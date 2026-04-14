@@ -12,7 +12,14 @@ import uuid
 from datetime import datetime, timezone
 import jwt
 import bcrypt
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Try emergentintegrations first (Emergent platform), fallback to openai SDK
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    USE_EMERGENT = True
+except ImportError:
+    from openai import AsyncOpenAI
+    USE_EMERGENT = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -375,18 +382,29 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
         
         system_message = f"{BASE_CONTEXT}\n\n{agent['system_prompt']}"
         
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        api_key = os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('AI_API_KEY')
         if not api_key:
             raise HTTPException(status_code=500, detail="API key not configured")
         
-        chat_instance = LlmChat(
-            api_key=api_key,
-            session_id=f"vertice-{uuid.uuid4()}",
-            system_message=system_message
-        ).with_model("openai", "gpt-4o")
-        
-        user_message = UserMessage(text=request.message)
-        response_text = await chat_instance.send_message(user_message)
+        if USE_EMERGENT:
+            chat_instance = LlmChat(
+                api_key=api_key,
+                session_id=f"vertice-{uuid.uuid4()}",
+                system_message=system_message
+            ).with_model("openai", "gpt-4o")
+            
+            user_message = UserMessage(text=request.message)
+            response_text = await chat_instance.send_message(user_message)
+        else:
+            openai_client = AsyncOpenAI(api_key=api_key)
+            completion = await openai_client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": request.message}
+                ]
+            )
+            response_text = completion.choices[0].message.content
         
         has_html = "<!DOCTYPE" in response_text or "<html" in response_text or "```html" in response_text
         has_proposal = any(word in response_text.lower() for word in ["propuesta", "cotización", "cotizacion", "presupuesto", "₡"])
