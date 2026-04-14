@@ -116,9 +116,9 @@ export default function AdminDashboard() {
         <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-2 text-sm text-[#8892a4] mb-2">
             <Zap size={14} className="text-green-400" />
-            <span>OpenAI GPT-4o</span>
+            <span>Groq Llama 3.3</span>
           </div>
-          <div className="text-xs text-[#8892a4]/60">Emergent LLM Key activa</div>
+          <div className="text-xs text-[#8892a4]/60">API Groq activa</div>
         </div>
 
         {/* User & Logout */}

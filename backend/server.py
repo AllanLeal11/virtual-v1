@@ -13,13 +13,14 @@ from datetime import datetime, timezone
 import jwt
 import bcrypt
 
-# Try emergentintegrations first (Emergent platform), fallback to openai SDK
+# Try emergentintegrations first (Emergent platform), then Groq, then OpenAI
 try:
     from emergentintegrations.llm.chat import LlmChat, UserMessage
-    USE_EMERGENT = True
+    LLM_PROVIDER = "emergent"
 except ImportError:
-    from openai import AsyncOpenAI
-    USE_EMERGENT = False
+    LLM_PROVIDER = "groq_or_openai"
+
+from groq import Groq
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -159,20 +160,59 @@ ENTREGA la propuesta inmediatamente, nunca pidas reuniones previas."""
         "name": "Rodrigo",
         "emoji": "💻",
         "role": "Developer",
-        "keywords": ["código", "codigo", "html", "css", "javascript", "web", "página", "pagina", "sitio", "website", "programar", "desarrollar", "landing"],
-        "system_prompt": """Eres Rodrigo, el desarrollador senior de Vértice Digital. Generas sitios web completos y funcionales.
+        "keywords": ["código", "codigo", "html", "css", "javascript", "web", "página", "pagina", "sitio", "website", "programar", "desarrollar", "landing", "crear web", "hazme una", "genera una", "construye"],
+        "system_prompt": """Eres Rodrigo, el desarrollador SENIOR FULL-STACK de Vértice Digital. Generas sitios web PROFESIONALES, COMPLETOS y LISTOS PARA PRODUCCIÓN.
 
-Cuando te pidan un sitio web, ENTREGA código HTML completo con:
-- Estructura HTML5 semántica
-- CSS embebido con diseño moderno y responsive
-- Hero section atractivo
-- Secciones de servicios, about, contacto
-- Animaciones CSS suaves
-- Imágenes de Unsplash (usa URLs reales)
-- Botón flotante de WhatsApp (+506 8751-8055)
-- Colores profesionales
+Cuando te pidan un sitio web, ENTREGA un documento HTML ÚNICO y COMPLETO que incluya TODO dentro del mismo archivo:
 
-SIEMPRE entrega el código completo listo para usar. NUNCA pidas más información."""
+ESTRUCTURA OBLIGATORIA:
+1. <!DOCTYPE html> con lang="es"
+2. <head> con meta viewport, Google Fonts (Syne + Inter), y TODO el CSS en <style>
+3. <body> con TODAS las secciones
+
+SECCIONES QUE SIEMPRE DEBES INCLUIR:
+- Header/Navbar fijo con glassmorphism (backdrop-filter: blur)
+- Hero section con texto grande, subtítulo y 2 botones CTA
+- Sección de Servicios (mínimo 4 cards con iconos SVG inline)
+- Sección "Sobre Nosotros" o "¿Por qué elegirnos?"
+- Sección de Testimonios (3 testimonios con foto y texto)
+- Sección de Contacto con formulario funcional
+- Footer con datos de la empresa
+- Botón flotante de WhatsApp (esquina inferior derecha, con animación pulse)
+
+REGLAS DE DISEÑO (MUY IMPORTANTE):
+- Usa un esquema de colores PROFESIONAL basado en lo que pida el cliente
+- Si no especifica colores: usa fondo oscuro (#0f172a), acento dorado (#f0a500), texto claro (#e2e8f0)
+- CSS Grid y Flexbox para layouts responsive
+- Media queries para mobile (max-width: 768px)
+- Transiciones suaves en hover (transform, opacity, background-color)
+- Animaciones de entrada con @keyframes (fadeIn, slideUp)
+- Sombras sutiles en cards (box-shadow)
+- Gradientes solo en elementos pequeños, NO en fondos grandes
+- Font-family: 'Syne' para títulos, 'Inter' para cuerpo
+- Imágenes de Unsplash con URLs REALES (https://images.unsplash.com/photo-...)
+
+JAVASCRIPT FUNCIONAL:
+- Menú hamburguesa para mobile
+- Smooth scroll al hacer click en links del navbar
+- Animación de entrada al hacer scroll (Intersection Observer)
+- Formulario con validación básica
+- Contador animado de números/estadísticas
+
+CALIDAD DEL CÓDIGO:
+- Variables CSS personalizadas (:root { --primary: ... })
+- Comentarios organizados por sección
+- HTML semántico (header, main, section, footer, nav, article)
+- Accesibilidad: alt en imágenes, aria-labels en botones
+- El código DEBE funcionar al abrir directamente en un navegador
+
+IMPORTANTE: 
+- El HTML debe ser MÍNIMO 300 líneas de código
+- NO uses frameworks ni CDNs externos (excepto Google Fonts)
+- Todo el CSS y JS va DENTRO del archivo HTML
+- NUNCA uses placeholder.com ni imágenes genéricas
+- Usa SVGs inline para iconos (no dependas de FontAwesome)
+- ENTREGA EL CÓDIGO COMPLETO, no resúmenes ni fragmentos"""
     },
     "sofia": {
         "name": "Sofía",
@@ -382,11 +422,26 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
         
         system_message = f"{BASE_CONTEXT}\n\n{agent['system_prompt']}"
         
-        api_key = os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('AI_API_KEY')
+        api_key = os.environ.get('GROQ_API_KEY') or os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('AI_API_KEY')
         if not api_key:
             raise HTTPException(status_code=500, detail="API key not configured")
         
-        if USE_EMERGENT:
+        groq_key = os.environ.get('GROQ_API_KEY')
+        
+        if groq_key:
+            # Use Groq (preferred - fast & free)
+            groq_client = Groq(api_key=groq_key)
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": request.message}
+                ],
+                max_tokens=8192,
+                temperature=0.7
+            )
+            response_text = completion.choices[0].message.content
+        elif LLM_PROVIDER == "emergent":
             chat_instance = LlmChat(
                 api_key=api_key,
                 session_id=f"vertice-{uuid.uuid4()}",
@@ -396,6 +451,7 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
             user_message = UserMessage(text=request.message)
             response_text = await chat_instance.send_message(user_message)
         else:
+            from openai import AsyncOpenAI
             openai_client = AsyncOpenAI(api_key=api_key)
             completion = await openai_client.chat.completions.create(
                 model="gpt-4o",
