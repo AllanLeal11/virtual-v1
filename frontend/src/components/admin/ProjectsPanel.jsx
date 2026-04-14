@@ -32,6 +32,7 @@ export default function ProjectsPanel() {
 
   useEffect(() => {
     loadProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStage]);
 
   const loadProjects = async () => {

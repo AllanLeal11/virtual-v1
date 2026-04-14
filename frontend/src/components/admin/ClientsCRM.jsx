@@ -32,6 +32,7 @@ export default function ClientsCRM() {
 
   useEffect(() => {
     loadClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus]);
 
   const loadClients = async () => {
