@@ -1,0 +1,85 @@
+{
+  "project_name": "Vértice Digital",
+  "theme": "dark",
+  "archetype": "Archetype 5 (Jewel & Luxury) - Premium Tropical-Modern",
+  "colors": {
+    "background": "#0d1b2a",
+    "surface": "#16213e",
+    "primary": "#f0a500",
+    "primary_hover": "#d49100",
+    "text_primary": "#e2e8f0",
+    "text_muted": "#8892a4",
+    "border": "rgba(255, 255, 255, 0.1)"
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Syne, sans-serif",
+      "body": "Inter, sans-serif"
+    },
+    "rules": {
+      "h1": "text-5xl md:text-6xl font-black tracking-tighter text-[#e2e8f0]",
+      "h2": "text-3xl md:text-5xl font-bold tracking-tight text-[#e2e8f0]",
+      "h3": "text-xl md:text-2xl font-bold tracking-tight text-[#f0a500]",
+      "body": "text-base font-normal tracking-normal text-[#e2e8f0] leading-relaxed",
+      "overlines": "text-xs font-semibold uppercase tracking-[0.2em] text-[#8892a4]"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing (p-12, p-24) on marketing page to let the dark aesthetic breathe. Control Room tight spacing (gap-4) in the admin panel.",
+    "public_grid": "MODE A: TETRIS GRID. Asymmetrical grid for services (grid-cols-1 md:grid-cols-12 gap-8).",
+    "admin_grid": "MODE B: CONTROL ROOM GRID. Strict grid hierarchy for dashboards (grid-cols-1 md:grid-cols-4 gap-6).",
+    "containers": "All surface containers must have 1px solid border-white/10 to ground them."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#f0a500] text-[#0d1b2a] font-bold hover:bg-[#d49100] transition-colors rounded-none px-6 py-3",
+      "whatsapp_floating": "fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:bg-[#128C7E] animate-pulse z-50",
+      "ghost": "text-[#e2e8f0] hover:text-[#f0a500] hover:bg-transparent transition-colors"
+    },
+    "surfaces": {
+      "header_glass": "backdrop-blur-xl bg-[#0d1b2a]/70 border-b border-white/10 sticky top-0 z-50",
+      "cards_marketing": "bg-[#16213e] border border-white/10 p-8 hover:-translate-y-1 transition-transform duration-300",
+      "cards_admin": "bg-[#16213e] border border-white/5 rounded-md p-6"
+    },
+    "shadcn_overrides": {
+      "notes": "Customize Shadcn to minimize rounded corners (rounded-none or max rounded-md). Override standard gray borders with border-white/10. Use #f0a500 for active states and focus rings."
+    }
+  },
+  "media": {
+    "hero_background": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/659a634f6ce30db48400c018a4d382449e9b72b24895d0fd7b5052af30d0b254.png",
+      "description": "Premium abstract dark navy background with glowing gold accents and tropical leaf shadow overlay. Use in hero section with a bg-[#0d1b2a]/40 overlay."
+    },
+    "service_whatsapp": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/d6334e0938ae9d2694f50315656619ca5dafb2904accf9bb9d64bc770498f5f0.png",
+      "description": "3D WhatsApp bot floating interface. Use in Services or Portfolio section."
+    },
+    "service_pos_invoice": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/e3291eb87b1f9a83cf947609dc55115cd96ce0a161bbc00b630958c4c8ccb8a7.png",
+      "description": "3D POS and electronic invoicing dashboard. Use in Services or Portfolio section."
+    },
+    "why_us_local": {
+      "url": "https://images.unsplash.com/photo-1649689727213-9842bb6fe095?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxjb3N0YSUyMHJpY2ElMjB0cm9waWNhbCUyMGRhcmslMjBhZXN0aGV0aWN8ZW58MHx8fHwxNzc2MTc0NDcxfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Local Guanacaste presence visual. Use in 'Why Us' section."
+    },
+    "about_office": {
+      "url": "https://images.unsplash.com/photo-1770992161088-7ad66282c9af?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBkYXJrJTIwb2ZmaWNlJTIwdGVjaCUyMGFnZW5jeXxlbnwwfHx8fDE3NzYxNzQ0NzF8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Modern dark office interior representing the agency."
+    }
+  },
+  "icons_and_agents": {
+    "library": "lucide-react",
+    "ai_agents_avatars": "Use standard emojis for the 10 agents as requested. Examples: 🤖, 📊, ✍️, 💻, 📈, 📱, 🛠️, 💬, 🔍, ⚡. Render them inside a circular bg-[#16213e] container with border-white/10."
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: Follow the exact color hex codes provided by the user. Background must be #0d1b2a, surfaces #16213e, accents #f0a500.",
+    "Typography: Use Syne for headings with tracking-tighter and font-black/bold. Use Inter for body copy. Do not deviate from these families.",
+    "Marketing vs Admin: The public site must use raw HTML/Tailwind for bento-box layouts, heavy padding, and dramatic scales. The Admin panel uses Shadcn components customized to match the dark navy theme with tight, efficient spacing.",
+    "Media: Always use the media URLs provided in this JSON. NEVER use placeholder services like via.placeholder.com or placehold.it.",
+    "Contrast: When placing text over the hero image, use a background overlay (e.g., bg-[#0d1b2a]/50 or a gradient) to guarantee APCA contrast minimums.",
+    "Testing: Add 'data-testid' to all buttons, links, form inputs, and key interactive elements using kebab-case role-based names (e.g. data-testid='contact-form-submit').",
+    "Shadcn Configuration: Override the default Vercel look. Reduce border-radius (rounded-sm or rounded-none) and rely on 1px subtle borders (border-white/10). Active states/rings should use the #f0a500 gold.",
+    "Navigation: Include a sidebar for the admin panel and a glassmorphism sticky header for the public landing page.",
+    "WhatsApp Float: Ensure the public site has a fixed floating WhatsApp button with an animate-pulse effect."
+  ]
+}
