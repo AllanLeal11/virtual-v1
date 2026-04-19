@@ -765,6 +765,24 @@ export default function LandingPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const buildWhatsAppUrl = (data, extraContext = "") => {
+    const lines = [
+      `Hola, soy *${data.name}*.`,
+      ``,
+      `📧 Correo: ${data.email}`,
+      `📱 Teléfono: ${data.phone}`,
+      `🛠️ Servicio de interés: ${data.service}`,
+      ``,
+      `💬 Mensaje:`,
+      data.message,
+    ];
+    if (extraContext) {
+      lines.push("", extraContext);
+    }
+    const text = encodeURIComponent(lines.join("\n"));
+    return `https://wa.me/50687518055?text=${text}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone || !form.service || !form.message) {
@@ -772,12 +790,28 @@ export default function LandingPage() {
       return;
     }
     setSubmitting(true);
+
+    // Build summary of selected services from cotizador (if any)
+    let extraContext = "";
+    const selectedKeys = Object.keys(selected);
+    if (selectedKeys.length > 0) {
+      extraContext = "🧾 Servicios seleccionados en el cotizador:\n" +
+        selectedKeys.map((k) => `• ${k}`).join("\n") +
+        (totalLabel && totalLabel !== "₡0" ? `\nTotal estimado: ${totalLabel}` : "");
+    }
+
     try {
-      const res = await axios.post(`${API}/contact`, form);
-      toast.success(res.data?.message || "¡Mensaje enviado! Te contactamos pronto.");
+      await axios.post(`${API}/contact`, form);
+      toast.success("¡Mensaje recibido! Abriendo WhatsApp...");
+      const waUrl = buildWhatsAppUrl(form, extraContext);
+      // Open WhatsApp in a new tab
+      window.open(waUrl, "_blank", "noopener,noreferrer");
       setForm({ name: "", email: "", phone: "", service: "", message: "" });
     } catch (err) {
-      toast.error("No se pudo enviar el mensaje. Intenta de nuevo.");
+      // Even if backend fails, still try to send via WhatsApp so user isn't blocked
+      toast.error("Guardado falló, pero te redirigimos a WhatsApp.");
+      const waUrl = buildWhatsAppUrl(form, extraContext);
+      window.open(waUrl, "_blank", "noopener,noreferrer");
     } finally {
       setSubmitting(false);
     }
@@ -929,7 +963,22 @@ export default function LandingPage() {
               <div className="resumen-note">
                 {hasCotizacion ? "* Automatizaciones se cotiza según proyecto." : ""}
               </div>
-              <a href="#contacto" className="resumen-btn">Solicitar cotización →</a>
+              <a
+                href="#contacto"
+                className="resumen-btn"
+                onClick={() => {
+                  if (keys.length > 0) {
+                    const summary = keys.join(", ");
+                    setForm((prev) => ({
+                      ...prev,
+                      service: keys.length === 1 ? keys[0] : "Otro / varios",
+                      message: prev.message
+                        ? prev.message
+                        : `Me interesa cotizar: ${summary}. ${hasRange ? "(" + totalLabel + ")" : ""}`.trim(),
+                    }));
+                  }
+                }}
+              >Solicitar cotización →</a>
             </div>
           </div>
         </div>
