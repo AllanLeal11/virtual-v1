@@ -1,182 +1,869 @@
-import React, { useState, useEffect } from "react";
-import { Menu, X, MessageCircle, Globe, FileText, ShoppingCart, Zap, ChevronRight, Phone, Mail, MapPin, Users, Clock, DollarSign, Check, Calculator, CalendarDays, Star, XCircle } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const SERVICES = [
-  { icon: Globe, title: "Sitios Web", description: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", price: "₡150,000 - ₡600,000", basePrice: 150000, features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
-  { icon: MessageCircle, title: "WhatsApp Bot", description: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", price: "₡200,000", basePrice: 200000, features: ["Respuestas automáticas", "Catálogo productos", "Reservas online", "24/7 disponible"] },
-  { icon: FileText, title: "Facturación Electrónica", description: "Sistema completo de facturación electrónica integrado con Hacienda Costa Rica.", price: "₡150,000", basePrice: 150000, features: ["Integración Hacienda", "Facturas y notas", "Reportes", "Multi-usuario"] },
-  { icon: ShoppingCart, title: "Sistema POS", description: "Punto de venta moderno para gestionar tu negocio de forma eficiente.", price: "₡400,000", basePrice: 400000, features: ["Inventario", "Ventas", "Reportes", "Multi-sucursal"] },
-  { icon: Zap, title: "Automatizaciones", description: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", price: "Cotización", basePrice: 100000, features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] }
+  { key: "Sitios Web", icon: "🌐", name: "Sitios Web", desc: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", priceLabel: "₡150,000 – ₡600,000", min: 150000, max: 600000, features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
+  { key: "WhatsApp Bot", icon: "💬", name: "WhatsApp Bot", desc: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", priceLabel: "₡200,000", min: 200000, max: null, features: ["Respuestas automáticas", "Catálogo de productos", "Atención 24/7", "Integración WhatsApp Business"] },
+  { key: "Facturación Electrónica", icon: "🧾", name: "Facturación Electrónica", desc: "Sistema completo de facturación electrónica integrado con Hacienda Costa Rica.", priceLabel: "₡150,000", min: 150000, max: null, features: ["Integración Hacienda", "Facturas y notas", "Reportes", "Multi-usuario"] },
+  { key: "Sistema POS", icon: "🛒", name: "Sistema POS", desc: "Punto de venta moderno para gestionar tu negocio de forma eficiente.", priceLabel: "₡400,000", min: 400000, max: null, features: ["Inventario", "Ventas", "Reportes", "Multi-sucursal"] },
+  { key: "Automatizaciones", icon: "⚡", name: "Automatizaciones", desc: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", priceLabel: "Cotización", min: 0, max: null, quote: true, features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] },
 ];
 
-const WHY_US = [
-  { icon: MapPin, title: "Somos Locales", description: "Ubicados en Liberia, Guanacaste. Conocemos el mercado local y sus necesidades." },
-  { icon: Users, title: "Soporte Presencial", description: "Visitas técnicas, capacitaciones y soporte en persona cuando lo necesites." },
-  { icon: DollarSign, title: "Precios en Colones", description: "Sin sorpresas por tipo de cambio. Todos nuestros precios en moneda local." },
-  { icon: Clock, title: "Entrega Rápida", description: "Proyectos ágiles con entregas en semanas, no meses." }
-];
+const STYLES = `
+  :root {
+    --bg: #0d1117;
+    --surface: #161d2b;
+    --surface2: #1c2538;
+    --gold: #f5a623;
+    --gold-dim: #c47f0f;
+    --text: #e8edf5;
+    --muted: #8899b0;
+    --border: rgba(245,166,35,0.15);
+  }
 
-const TESTIMONIALS = [
-  { name: "María Fernández", business: "Restaurante El Sabor Tico", text: "Vértice Digital nos hizo el sitio web y el sistema POS. Las ventas aumentaron un 35% en el primer mes. ¡Excelente servicio!", rating: 5, avatar: "MF" },
-  { name: "Roberto Jiménez", business: "Ferretería Guanacaste", text: "El bot de WhatsApp nos ahorra 4 horas diarias. Los clientes hacen pedidos solos y nosotros solo despachamos. Increíble.", rating: 5, avatar: "RJ" },
-  { name: "Ana Lucía Mora", business: "Clínica Dental Liberia", text: "La facturación electrónica fue un dolor de cabeza hasta que Vértice lo resolvió. Ahora todo es automático y cumplimos con Hacienda.", rating: 5, avatar: "AM" }
-];
+  .vd-root * { margin: 0; padding: 0; box-sizing: border-box; }
+  .vd-root { scroll-behavior: smooth; }
 
-const DEMO_TIMES = [
-  "9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM", "4:00 PM"
-];
+  .vd-root {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  .vd-root nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5%;
+    height: 64px;
+  }
+
+  .vd-root .nav-brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+  }
+
+  .vd-root .nav-logo {
+    width: 38px; height: 38px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 18px;
+    color: #0d1117;
+    flex-shrink: 0;
+  }
+
+  .vd-root .nav-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .vd-root .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+
+  .vd-root .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color .2s;
+  }
+
+  .vd-root .nav-links a:hover { color: var(--gold); }
+
+  .vd-root .nav-cta {
+    background: var(--gold);
+    color: #0d1117 !important;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+  }
+
+  .vd-root .hamburger {
+    display: none;
+    flex-direction: column; gap: 5px;
+    background: none; border: none;
+    cursor: pointer; padding: 4px;
+  }
+
+  .vd-root .hamburger span {
+    width: 24px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: .3s;
+  }
+
+  /* HERO */
+  .vd-root .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 100px 5% 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vd-root .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(245,166,35,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .vd-root .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(245,166,35,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .vd-root .hero-inner {
+    max-width: 1100px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center;
+  }
+
+  .vd-root .hero-tag {
+    display: inline-block;
+    background: rgba(245,166,35,0.12);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .vd-root .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .vd-root .hero h1 span { color: var(--gold); }
+
+  .vd-root .hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin-bottom: 36px;
+    max-width: 420px;
+  }
+
+  .vd-root .hero-btns {
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+
+  .vd-root .btn-primary {
+    background: var(--gold);
+    color: #0d1117;
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform .2s, box-shadow .2s;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .vd-root .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,166,35,0.3);
+  }
+
+  .vd-root .btn-outline {
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: border-color .2s, color .2s;
+    display: inline-block;
+  }
+
+  .vd-root .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .vd-root .hero-visual {
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+  }
+
+  .vd-root .hero-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 280px;
+    animation: vdFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes vdFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .vd-root .hero-card-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 12px;
+  }
+
+  .vd-root .hero-card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .vd-root .hero-card-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .vd-root .hero-tags {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+
+  .vd-root .hero-tag-pill {
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.2);
+    color: var(--gold);
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  /* SECTIONS */
+  .vd-root .section { padding: 90px 5%; }
+  .vd-root .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .vd-root .section-tag {
+    display: inline-block;
+    color: var(--gold);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .vd-root .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .vd-root .section-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 52px;
+    max-width: 520px;
+  }
+
+  /* SERVICES */
+  .vd-root .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .vd-root .service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color .25s, transform .25s;
+  }
+
+  .vd-root .service-card:hover {
+    border-color: rgba(245,166,35,0.5);
+    transform: translateY(-4px);
+  }
+
+  .vd-root .service-icon {
+    width: 52px; height: 52px;
+    background: rgba(245,166,35,0.12);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  .vd-root .service-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+  .vd-root .service-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+    line-height: 1.55;
+  }
+
+  .vd-root .service-price {
+    color: var(--gold);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 18px;
+  }
+
+  .vd-root .service-features {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .vd-root .service-features li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .vd-root .service-features li::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* COTIZADOR */
+  .vd-root #cotizador {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .vd-root .cotizador-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .vd-root .cotizador-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .vd-root .cotizador-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .vd-root .service-check {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color .2s;
+    user-select: none;
+  }
+
+  .vd-root .service-check:hover { border-color: rgba(245,166,35,0.4); }
+  .vd-root .service-check.active { border-color: var(--gold); background: rgba(245,166,35,0.06); }
+
+  .vd-root .sc-left {
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .vd-root .sc-checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--muted);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    transition: .2s;
+    flex-shrink: 0;
+  }
+
+  .vd-root .service-check.active .sc-checkbox {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #0d1117;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .vd-root .sc-icon { font-size: 18px; }
+
+  .vd-root .sc-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .vd-root .sc-price {
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-align: right;
+  }
+
+  .vd-root .sc-price.gold { color: var(--gold); font-weight: 600; }
+
+  /* RESUMEN */
+  .vd-root .resumen {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: sticky;
+    top: 84px;
+  }
+
+  .vd-root .resumen-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .vd-root .resumen-items { margin-bottom: 20px; min-height: 60px; }
+
+  .vd-root .resumen-item {
+    display: flex; justify-content: space-between;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .vd-root .resumen-empty {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .vd-root .resumen-total {
+    display: flex; justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-weight: 700;
+  }
+
+  .vd-root .resumen-total .amount {
+    color: var(--gold);
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+  }
+
+  .vd-root .resumen-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  .vd-root .resumen-btn {
+    display: block;
+    width: 100%;
+    background: var(--gold);
+    color: #0d1117;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 20px;
+    font-family: 'DM Sans', sans-serif;
+    transition: transform .2s, box-shadow .2s;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .vd-root .resumen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,166,35,0.35);
+  }
+
+  /* CONTACTO */
+  .vd-root #contacto { padding: 90px 5%; }
+
+  .vd-root .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .vd-root .contact-info p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+  }
+
+  .vd-root .contact-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .vd-root .contact-icon {
+    width: 42px; height: 42px;
+    background: rgba(245,166,35,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .vd-root .contact-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 3px;
+  }
+
+  .vd-root .contact-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .vd-root .contact-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .vd-root .form-group { margin-bottom: 18px; }
+
+  .vd-root .form-group label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 7px;
+    font-weight: 500;
+  }
+
+  .vd-root .form-group input,
+  .vd-root .form-group textarea,
+  .vd-root .form-group select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .vd-root .form-group input:focus,
+  .vd-root .form-group textarea:focus,
+  .vd-root .form-group select:focus {
+    border-color: var(--gold);
+  }
+
+  .vd-root .form-group select option { background: var(--surface2); }
+  .vd-root .form-group textarea { resize: vertical; min-height: 100px; }
+
+  .vd-root .form-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0d1117;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .vd-root .form-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,166,35,.35);
+  }
+
+  .vd-root .form-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* FOOTER */
+  .vd-root footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .vd-root .footer-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+
+  .vd-root .footer-brand .nav-logo { width: 32px; height: 32px; font-size: 15px; }
+  .vd-root .footer-brand span { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text); }
+
+  .vd-root .footer-copy {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  /* WHATSAPP FLOAT */
+  .vd-root .wa-float {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    z-index: 99;
+    width: 56px; height: 56px;
+    background: #25D366;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .vd-root .wa-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 28px rgba(37,211,102,0.55);
+  }
+
+  .vd-root .wa-float svg { width: 28px; height: 28px; fill: #fff; }
+
+  /* MOBILE MENU */
+  .vd-root .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 64px; left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 5%;
+    z-index: 99;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .vd-root .mobile-menu.open { display: flex; }
+
+  .vd-root .mobile-menu a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .vd-root .mobile-menu a:last-child { border-bottom: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .vd-root .hero-inner { grid-template-columns: 1fr; }
+    .vd-root .hero-visual { display: none; }
+    .vd-root .cotizador-grid { grid-template-columns: 1fr; }
+    .vd-root .resumen { position: static; }
+    .vd-root .contact-grid { grid-template-columns: 1fr; }
+    .vd-root .nav-links { display: none; }
+    .vd-root .hamburger { display: flex; }
+  }
+
+  @media (max-width: 600px) {
+    .vd-root .services-grid { grid-template-columns: 1fr; }
+    .vd-root .hero { padding-top: 90px; }
+    .vd-root footer { flex-direction: column; align-items: flex-start; }
+  }
+`;
+
+function formatNum(n) {
+  return "₡" + n.toLocaleString("es-CR");
+}
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [selected, setSelected] = useState({}); // { [key]: {min, max, quote} }
+  const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  // Calculator state
-  const [selectedServices, setSelectedServices] = useState([]);
-  const [showCalculator, setShowCalculator] = useState(false);
-
-  // Demo booking state
-  const [showDemoModal, setShowDemoModal] = useState(false);
-  const [demoForm, setDemoForm] = useState({ name: "", phone: "", date: "", time: "", business: "" });
-
-  // Exit popup state
-  const [showExitPopup, setShowExitPopup] = useState(false);
-  const [exitPopupShown, setExitPopupShown] = useState(false);
-
-  // Exit intent detection
-  useEffect(() => {
-    const handleMouseLeave = (e) => {
-      if (e.clientY <= 0 && !exitPopupShown) {
-        setShowExitPopup(true);
-        setExitPopupShown(true);
+  const toggleService = (svc) => {
+    setSelected((prev) => {
+      const next = { ...prev };
+      if (next[svc.key]) {
+        delete next[svc.key];
+      } else {
+        next[svc.key] = { min: svc.min, max: svc.max, quote: !!svc.quote };
       }
-    };
-    document.addEventListener("mouseleave", handleMouseLeave);
-    return () => document.removeEventListener("mouseleave", handleMouseLeave);
-  }, [exitPopupShown]);
+      return next;
+    });
+  };
 
-  const handleContactSubmit = async (e) => {
+  const keys = Object.keys(selected);
+  let minTotal = 0;
+  let hasRange = false;
+  let hasCotizacion = false;
+
+  keys.forEach((k) => {
+    const s = selected[k];
+    if (s.quote || s.min === 0) {
+      hasCotizacion = true;
+    } else if (s.max) {
+      minTotal += s.min;
+      hasRange = true;
+    } else {
+      minTotal += s.min;
+    }
+  });
+
+  const totalLabel =
+    keys.length === 0
+      ? "₡0"
+      : minTotal > 0
+      ? hasRange
+        ? "Desde " + formatNum(minTotal)
+        : formatNum(minTotal)
+      : "A cotizar";
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.name || !form.email || !form.phone || !form.service || !form.message) {
+      toast.error("Por favor completa todos los campos.");
+      return;
+    }
     setSubmitting(true);
     try {
-      const response = await axios.post(`${API}/contact`, contactForm);
-      toast.success("¡Mensaje enviado! Te contactaremos pronto.");
-      window.open(response.data.whatsapp_redirect, "_blank");
-      setContactForm({ name: "", email: "", phone: "", service: "", message: "" });
-    } catch (error) {
-      toast.error("Error al enviar. Intenta de nuevo.");
+      const res = await axios.post(`${API}/contact`, form);
+      toast.success(res.data?.message || "¡Mensaje enviado! Te contactamos pronto.");
+      setForm({ name: "", email: "", phone: "", service: "", message: "" });
+    } catch (err) {
+      toast.error("No se pudo enviar el mensaje. Intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
-
-  const handleDemoSubmit = (e) => {
-    e.preventDefault();
-    const msg = `Hola, soy ${demoForm.name} de ${demoForm.business}. Quiero agendar una demostración para el ${demoForm.date} a las ${demoForm.time}.`;
-    window.open(`https://wa.me/50687518055?text=${encodeURIComponent(msg)}`, "_blank");
-    toast.success("¡Solicitud enviada por WhatsApp!");
-    setShowDemoModal(false);
-    setDemoForm({ name: "", phone: "", date: "", time: "", business: "" });
-  };
-
-  const toggleService = (index) => {
-    setSelectedServices(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
-    );
-  };
-
-  const totalPrice = selectedServices.reduce((sum, i) => sum + SERVICES[i].basePrice, 0);
-  const discountedPrice = selectedServices.length >= 3 ? Math.round(totalPrice * 0.85) : selectedServices.length >= 2 ? Math.round(totalPrice * 0.9) : totalPrice;
-  const discount = selectedServices.length >= 3 ? 15 : selectedServices.length >= 2 ? 10 : 0;
-
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    setMobileMenuOpen(false);
-  };
-
-  const formatPrice = (n) => "₡" + n.toLocaleString("es-CR");
 
   return (
-    <div className="min-h-screen bg-[#0d1b2a]">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#f0a500] rounded flex items-center justify-center">
-                <span className="font-bold text-[#0d1b2a] text-xl font-['Syne']">V</span>
-              </div>
-              <span className="font-bold text-xl text-[#e2e8f0] font-['Syne']">Vértice Digital</span>
-            </div>
-            <nav className="hidden md:flex items-center gap-8">
-              {[["servicios","Servicios"],["calculadora","Cotizador"],["nosotros","Nosotros"],["testimonios","Clientes"],["contacto","Contacto"]].map(([id,label]) => (
-                <button key={id} onClick={() => scrollToSection(id)} className="text-[#8892a4] hover:text-[#f0a500] transition-colors" data-testid={`nav-${id}`}>{label}</button>
-              ))}
-              <a href="/admin" className="text-[#8892a4] hover:text-[#f0a500] transition-colors" data-testid="nav-admin">Admin</a>
-            </nav>
-            <button className="md:hidden text-[#e2e8f0]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="mobile-menu-toggle">
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-[#16213e] border-t border-white/10 px-4 py-4 space-y-3">
-            {[["servicios","Servicios"],["calculadora","Cotizador"],["nosotros","Nosotros"],["testimonios","Clientes"],["contacto","Contacto"]].map(([id,label]) => (
-              <button key={id} onClick={() => scrollToSection(id)} className="block w-full text-left text-[#e2e8f0] hover:text-[#f0a500] py-2">{label}</button>
-            ))}
-            <a href="/admin" className="block text-[#e2e8f0] hover:text-[#f0a500] py-2">Admin</a>
-          </div>
-        )}
-      </header>
+    <div className="vd-root">
+      <style>{STYLES}</style>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet"
+      />
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/659a634f6ce30db48400c018a4d382449e9b72b24895d0fd7b5052af30d0b254.png)`, opacity: 0.3 }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0d1b2a]/50 via-[#0d1b2a]/70 to-[#0d1b2a]" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="animate-fadeIn">
-            <p className="text-[#f0a500] text-sm font-semibold tracking-[0.2em] uppercase mb-6">Tecnología para Guanacaste</p>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tighter text-[#e2e8f0] mb-6 font-['Syne']">Vértice Digital</h1>
-            <p className="text-xl sm:text-2xl text-[#8892a4] max-w-2xl mx-auto mb-10">Tecnología que impulsa tu negocio en Guanacaste</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => scrollToSection("calculadora")} className="bg-[#f0a500] text-[#0d1b2a] font-bold px-8 py-4 hover:bg-[#d49100] transition-colors flex items-center justify-center gap-2" data-testid="hero-cta-calculator">
-                <Calculator size={20} /> Cotizar Ahora
-              </button>
-              <button onClick={() => setShowDemoModal(true)} className="border border-[#f0a500] text-[#f0a500] font-bold px-8 py-4 hover:bg-[#f0a500]/10 transition-colors flex items-center justify-center gap-2" data-testid="hero-cta-demo">
-                <CalendarDays size={20} /> Agendar Demo
-              </button>
+      {/* NAV */}
+      <nav>
+        <a href="#" className="nav-brand">
+          <div className="nav-logo">V</div>
+          <span className="nav-name">Vértice Digital</span>
+        </a>
+        <ul className="nav-links">
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#cotizador">Cotizador</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="#contacto" className="nav-cta">Hablemos</a></li>
+        </ul>
+        <button className="hamburger" onClick={() => setMobileOpen((v) => !v)} aria-label="Menú">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+
+      {/* MOBILE MENU */}
+      <div className={`mobile-menu ${mobileOpen ? "open" : ""}`}>
+        <a href="#servicios" onClick={() => setMobileOpen(false)}>Servicios</a>
+        <a href="#cotizador" onClick={() => setMobileOpen(false)}>Cotizador</a>
+        <a href="#contacto" onClick={() => setMobileOpen(false)}>Contacto</a>
+        <a href="#contacto" onClick={() => setMobileOpen(false)} style={{ color: "var(--gold)", fontWeight: 600 }}>Hablemos →</a>
+      </div>
+
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-inner">
+          <div className="hero-content">
+            <div className="hero-tag">Liberia, Guanacaste · Costa Rica</div>
+            <h1>Tecnología digital para <span>negocios de Guanacaste</span></h1>
+            <p>Soluciones web, automatizaciones y sistemas a medida para impulsar tu negocio en la región.</p>
+            <div className="hero-btns">
+              <a href="#cotizador" className="btn-primary">Arma tu paquete</a>
+              <a href="#servicios" className="btn-outline">Ver servicios</a>
             </div>
           </div>
-        </div>
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronRight size={32} className="text-[#f0a500] rotate-90" />
+          <div className="hero-visual">
+            <div className="hero-card">
+              <div className="hero-card-label">Nuestros servicios</div>
+              <div className="hero-card-num">5</div>
+              <div className="hero-card-sub">Soluciones disponibles</div>
+              <div className="hero-tags">
+                <span className="hero-tag-pill">Sitios Web</span>
+                <span className="hero-tag-pill">WhatsApp Bot</span>
+                <span className="hero-tag-pill">Facturación</span>
+                <span className="hero-tag-pill">Sistema POS</span>
+                <span className="hero-tag-pill">Automatizaciones</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="servicios" className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">Nuestros Servicios</p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] font-['Syne']">Soluciones Digitales</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {SERVICES.map((service, index) => (
-              <div key={index} className="service-card bg-[#16213e] border border-white/10 p-8 group" data-testid={`service-card-${index}`}>
-                <div className="w-14 h-14 bg-[#f0a500]/10 rounded flex items-center justify-center mb-6 group-hover:bg-[#f0a500]/20 transition-colors">
-                  <service.icon className="w-7 h-7 text-[#f0a500]" />
-                </div>
-                <h3 className="text-xl font-bold text-[#e2e8f0] mb-3 font-['Syne']">{service.title}</h3>
-                <p className="text-[#8892a4] mb-4 text-sm leading-relaxed">{service.description}</p>
-                <p className="text-[#f0a500] font-bold text-lg mb-4">{service.price}</p>
-                <ul className="space-y-2">
-                  {service.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-[#8892a4]">
-                      <Check size={14} className="text-[#f0a500]" /> {feature}
-                    </li>
+      {/* SERVICIOS */}
+      <section className="section" id="servicios">
+        <div className="section-inner">
+          <span className="section-tag">Lo que hacemos</span>
+          <h2 className="section-title">Servicios</h2>
+          <p className="section-sub">Soluciones digitales para negocios de la región.</p>
+
+          <div className="services-grid">
+            {SERVICES.map((svc) => (
+              <div className="service-card" key={svc.key}>
+                <div className="service-icon">{svc.icon}</div>
+                <div className="service-name">{svc.name}</div>
+                <div className="service-desc">{svc.desc}</div>
+                <div className="service-price">{svc.priceLabel}</div>
+                <ul className="service-features">
+                  {svc.features.map((f, i) => (
+                    <li key={i}>{f}</li>
                   ))}
                 </ul>
               </div>
@@ -185,274 +872,176 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Price Calculator Section */}
-      <section id="calculadora" className="py-24 px-4 sm:px-6 lg:px-8 bg-[#16213e]/50">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">Cotizador Instantáneo</p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] font-['Syne'] mb-4">Arma tu Paquete</h2>
-            <p className="text-[#8892a4]">Selecciona los servicios que necesitas y obtén tu precio al instante</p>
-          </div>
-
-          <div className="grid gap-4 mb-8">
-            {SERVICES.map((service, index) => (
-              <button
-                key={index}
-                onClick={() => toggleService(index)}
-                className={`flex items-center justify-between p-5 rounded border transition-all ${
-                  selectedServices.includes(index)
-                    ? "bg-[#f0a500]/10 border-[#f0a500] text-[#f0a500]"
-                    : "bg-[#0d1b2a] border-white/10 text-[#8892a4] hover:border-[#f0a500]/30"
-                }`}
-                data-testid={`calc-service-${index}`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                    selectedServices.includes(index) ? "border-[#f0a500] bg-[#f0a500]" : "border-[#8892a4]"
-                  }`}>
-                    {selectedServices.includes(index) && <Check size={14} className="text-[#0d1b2a]" />}
-                  </div>
-                  <service.icon size={20} />
-                  <span className="font-medium text-[#e2e8f0]">{service.title}</span>
-                </div>
-                <span className="font-bold">{service.price}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Price summary */}
-          {selectedServices.length > 0 && (
-            <div className="bg-[#0d1b2a] border border-[#f0a500]/30 rounded p-8 text-center animate-fadeIn">
-              {discount > 0 && (
-                <div className="inline-block bg-[#f0a500] text-[#0d1b2a] px-4 py-1 rounded-full text-sm font-bold mb-4">
-                  {discount}% DESCUENTO por paquete
-                </div>
-              )}
-              {discount > 0 && (
-                <p className="text-[#8892a4] line-through text-lg">{formatPrice(totalPrice)}</p>
-              )}
-              <p className="text-4xl font-black text-[#f0a500] font-['Syne'] my-2">
-                {formatPrice(discountedPrice)}
-              </p>
-              <p className="text-[#8892a4] text-sm mb-6">
-                {selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""} seleccionado{selectedServices.length > 1 ? "s" : ""}
-                {selectedServices.length >= 2 && " — ¡Precio especial de paquete!"}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={() => {
-                    const services = selectedServices.map(i => SERVICES[i].title).join(", ");
-                    const msg = `Hola, me interesa el paquete: ${services}. Precio: ${formatPrice(discountedPrice)}`;
-                    window.open(`https://wa.me/50687518055?text=${encodeURIComponent(msg)}`, "_blank");
-                  }}
-                  className="bg-[#f0a500] text-[#0d1b2a] font-bold px-8 py-3 hover:bg-[#d49100] transition-colors"
-                  data-testid="calc-whatsapp-btn"
-                >
-                  Cotizar por WhatsApp
-                </button>
-                <button
-                  onClick={() => setShowDemoModal(true)}
-                  className="border border-[#f0a500] text-[#f0a500] font-bold px-8 py-3 hover:bg-[#f0a500]/10 transition-colors"
-                  data-testid="calc-demo-btn"
-                >
-                  Agendar Demostración
-                </button>
-              </div>
-              <p className="text-[#8892a4] text-xs mt-4">Precio válido por 7 días. Incluye soporte post-entrega.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Why Us Section */}
-      <section id="nosotros" className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      {/* COTIZADOR */}
+      <section className="section" id="cotizador">
+        <div className="section-inner">
+          <span className="section-tag">Cotizador Instantáneo</span>
+          <div className="cotizador-grid">
             <div>
-              <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">¿Por qué elegirnos?</p>
-              <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] mb-6 font-['Syne']">Somos de Guanacaste</h2>
-              <p className="text-[#8892a4] text-lg mb-8">No somos una empresa de San José que trabaja remotamente. Estamos aquí, en Liberia, listos para visitarte, capacitarte y darte soporte cuando lo necesites.</p>
-              <div className="grid grid-cols-2 gap-6">
-                {WHY_US.map((item, index) => (
-                  <div key={index} className="space-y-3" data-testid={`why-us-${index}`}>
-                    <div className="w-12 h-12 bg-[#f0a500]/10 rounded flex items-center justify-center">
-                      <item.icon className="w-6 h-6 text-[#f0a500]" />
+              <h2 className="cotizador-title">Arma tu Paquete</h2>
+              <p className="cotizador-sub">Selecciona los servicios que necesitas y obtén tu precio al instante.</p>
+
+              {SERVICES.map((svc) => {
+                const active = !!selected[svc.key];
+                return (
+                  <div
+                    key={svc.key}
+                    className={`service-check ${active ? "active" : ""}`}
+                    onClick={() => toggleService(svc)}
+                  >
+                    <div className="sc-left">
+                      <div className="sc-checkbox">{active ? "✓" : ""}</div>
+                      <span className="sc-icon">{svc.icon}</span>
+                      <span className="sc-name">{svc.name}</span>
                     </div>
-                    <h3 className="font-bold text-[#e2e8f0] font-['Syne']">{item.title}</h3>
-                    <p className="text-[#8892a4] text-sm">{item.description}</p>
+                    <span className={`sc-price ${svc.quote ? "gold" : ""}`}>{svc.priceLabel}</span>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-            <div className="relative">
-              <img src="https://images.unsplash.com/photo-1770992161088-7ad66282c9af?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBkYXJrJTIwb2ZmaWNlJTIwdGVjaCUyMGFnZW5jeXxlbnwwfHx8fDE3NzYxNzQ0NzF8MA&ixlib=rb-4.1.0&q=85" alt="Oficina Vértice Digital" className="rounded-lg border border-white/10" />
-              <div className="absolute -bottom-6 -right-6 bg-[#f0a500] p-6 rounded">
-                <p className="text-[#0d1b2a] font-bold text-2xl font-['Syne']">5+</p>
-                <p className="text-[#0d1b2a] text-sm">años de experiencia</p>
+
+            {/* RESUMEN */}
+            <div className="resumen">
+              <div className="resumen-title">Tu resumen</div>
+              <div className="resumen-items">
+                {keys.length === 0 ? (
+                  <div className="resumen-empty">Selecciona servicios para ver tu estimado</div>
+                ) : (
+                  keys.map((k) => {
+                    const s = selected[k];
+                    let priceLabel;
+                    if (s.quote || s.min === 0) priceLabel = "Cotización";
+                    else if (s.max) priceLabel = formatNum(s.min) + " – " + formatNum(s.max);
+                    else priceLabel = formatNum(s.min);
+                    return (
+                      <div className="resumen-item" key={k}>
+                        <span>{k}</span>
+                        <span>{priceLabel}</span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
+              <div className="resumen-total">
+                <span>Total estimado</span>
+                <span className="amount">{totalLabel}</span>
+              </div>
+              <div className="resumen-note">
+                {hasCotizacion ? "* Automatizaciones se cotiza según proyecto." : ""}
+              </div>
+              <a href="#contacto" className="resumen-btn">Solicitar cotización →</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonios" className="py-24 px-4 sm:px-6 lg:px-8 bg-[#16213e]/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">Casos de Éxito</p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] font-['Syne']">Clientes Satisfechos</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <div key={index} className="bg-[#0d1b2a] border border-white/10 p-8 rounded" data-testid={`testimonial-${index}`}>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={18} className="text-[#f0a500] fill-[#f0a500]" />
-                  ))}
-                </div>
-                <p className="text-[#e2e8f0] mb-6 leading-relaxed italic">"{testimonial.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#f0a500] rounded-full flex items-center justify-center">
-                    <span className="text-[#0d1b2a] font-bold text-sm">{testimonial.avatar}</span>
-                  </div>
-                  <div>
-                    <p className="text-[#e2e8f0] font-medium">{testimonial.name}</p>
-                    <p className="text-[#8892a4] text-sm">{testimonial.business}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* CONTACTO */}
+      <section className="section" id="contacto">
+        <div className="section-inner">
+          <span className="section-tag">Contacto</span>
+          <div className="contact-grid">
+            <div className="contact-info">
+              <h2 className="section-title">Hablemos</h2>
+              <p>¿Listo para digitalizar tu negocio? Escríbenos y te respondemos rápido.</p>
 
-      {/* Portfolio Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">Portafolio</p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] font-['Syne']">Nuestro Trabajo</h2>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="group relative overflow-hidden rounded-lg border border-white/10">
-              <img src="https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/d6334e0938ae9d2694f50315656619ca5dafb2904accf9bb9d64bc770498f5f0.png" alt="WhatsApp Bot" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d1b2a] to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold text-[#e2e8f0] font-['Syne']">WhatsApp Bots</h3>
-                <p className="text-[#8892a4] text-sm">Automatización de atención al cliente</p>
+              <div className="contact-item">
+                <div className="contact-icon">📍</div>
+                <div>
+                  <div className="contact-label">Ubicación</div>
+                  <div className="contact-value">Liberia, Guanacaste, Costa Rica</div>
+                </div>
               </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-lg border border-white/10">
-              <img src="https://static.prod-images.emergentagent.com/jobs/4aa9df6c-ab79-40dc-938e-1b6226649def/images/e3291eb87b1f9a83cf947609dc55115cd96ce0a161bbc00b630958c4c8ccb8a7.png" alt="POS System" className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d1b2a] to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold text-[#e2e8f0] font-['Syne']">Sistemas POS</h3>
-                <p className="text-[#8892a4] text-sm">Facturación electrónica integrada</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Contact Section */}
-      <section id="contacto" className="py-24 px-4 sm:px-6 lg:px-8 bg-[#16213e]/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16">
-            <div>
-              <p className="text-[#f0a500] text-xs font-semibold tracking-[0.2em] uppercase mb-4">Contacto</p>
-              <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#e2e8f0] mb-6 font-['Syne']">¿Listo para empezar?</h2>
-              <p className="text-[#8892a4] text-lg mb-8">Cuéntanos sobre tu proyecto y te contactaremos en menos de 24 horas con una propuesta personalizada.</p>
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#f0a500]/10 rounded flex items-center justify-center"><Phone className="w-6 h-6 text-[#f0a500]" /></div>
-                  <div><p className="text-[#8892a4] text-sm">Teléfono / WhatsApp</p><a href="tel:+50687518055" className="text-[#e2e8f0] font-semibold hover:text-[#f0a500]">+506 8751-8055</a></div>
+              <div className="contact-item">
+                <div className="contact-icon">💬</div>
+                <div>
+                  <div className="contact-label">WhatsApp</div>
+                  <a href="https://wa.me/50687518055" className="contact-value" style={{ color: "var(--text)", textDecoration: "none" }}>
+                    Escríbenos por WhatsApp
+                  </a>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#f0a500]/10 rounded flex items-center justify-center"><Mail className="w-6 h-6 text-[#f0a500]" /></div>
-                  <div><p className="text-[#8892a4] text-sm">Email</p><p className="text-[#e2e8f0] font-semibold">info@verticedigital.cr</p></div>
+              </div>
+
+              <div className="contact-item">
+                <div className="contact-icon">✉️</div>
+                <div>
+                  <div className="contact-label">Correo</div>
+                  <a href="mailto:verticedigital11@gmail.com" className="contact-value" style={{ color: "var(--text)", textDecoration: "none" }}>
+                    verticedigital11@gmail.com
+                  </a>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#f0a500]/10 rounded flex items-center justify-center"><MapPin className="w-6 h-6 text-[#f0a500]" /></div>
-                  <div><p className="text-[#8892a4] text-sm">Ubicación</p><p className="text-[#e2e8f0] font-semibold">Liberia, Guanacaste, Costa Rica</p></div>
+              </div>
+
+              <div className="contact-item">
+                <div className="contact-icon">🕐</div>
+                <div>
+                  <div className="contact-label">Horario</div>
+                  <div className="contact-value">Lunes – Viernes, 8 am – 6 pm</div>
                 </div>
               </div>
             </div>
-            <form onSubmit={handleContactSubmit} className="bg-[#16213e] border border-white/10 p-8 space-y-6" data-testid="contact-form">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div><label className="block text-[#8892a4] text-sm mb-2">Nombre</label><input type="text" required value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-4 py-3 text-[#e2e8f0] placeholder-[#8892a4]" placeholder="Tu nombre" data-testid="contact-name" /></div>
-                <div><label className="block text-[#8892a4] text-sm mb-2">Email</label><input type="email" required value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-4 py-3 text-[#e2e8f0] placeholder-[#8892a4]" placeholder="tu@email.com" data-testid="contact-email" /></div>
+
+            <form className="contact-form" onSubmit={handleSubmit}>
+              <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.15rem", marginBottom: "22px" }}>
+                Envíanos un mensaje
+              </h3>
+
+              <div className="form-group">
+                <label>Nombre</label>
+                <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Tu nombre" />
               </div>
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div><label className="block text-[#8892a4] text-sm mb-2">Teléfono</label><input type="tel" required value={contactForm.phone} onChange={(e) => setContactForm({...contactForm, phone: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-4 py-3 text-[#e2e8f0] placeholder-[#8892a4]" placeholder="+506 0000-0000" data-testid="contact-phone" /></div>
-                <div><label className="block text-[#8892a4] text-sm mb-2">Servicio</label><select required value={contactForm.service} onChange={(e) => setContactForm({...contactForm, service: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-4 py-3 text-[#e2e8f0]" data-testid="contact-service"><option value="">Seleccionar...</option><option value="Sitio Web">Sitio Web</option><option value="WhatsApp Bot">WhatsApp Bot</option><option value="Facturación Electrónica">Facturación Electrónica</option><option value="Sistema POS">Sistema POS</option><option value="Automatizaciones">Automatizaciones</option><option value="Otro">Otro</option></select></div>
+
+              <div className="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="tucorreo@ejemplo.com" />
               </div>
-              <div><label className="block text-[#8892a4] text-sm mb-2">Mensaje</label><textarea required rows={4} value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-4 py-3 text-[#e2e8f0] placeholder-[#8892a4] resize-none" placeholder="Cuéntanos sobre tu proyecto..." data-testid="contact-message" /></div>
-              <button type="submit" disabled={submitting} className="w-full bg-[#f0a500] text-[#0d1b2a] font-bold py-4 hover:bg-[#d49100] transition-colors disabled:opacity-50" data-testid="contact-submit">{submitting ? "Enviando..." : "Enviar Mensaje"}</button>
+
+              <div className="form-group">
+                <label>Teléfono / WhatsApp</label>
+                <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+506 ···· ····" />
+              </div>
+
+              <div className="form-group">
+                <label>Servicio de interés</label>
+                <select name="service" value={form.service} onChange={handleChange}>
+                  <option value="">Seleccionar…</option>
+                  <option>Sitio Web</option>
+                  <option>WhatsApp Bot</option>
+                  <option>Facturación Electrónica</option>
+                  <option>Sistema POS</option>
+                  <option>Automatizaciones</option>
+                  <option>Otro / varios</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Mensaje</label>
+                <textarea name="message" value={form.message} onChange={handleChange} placeholder="Cuéntanos sobre tu negocio…" />
+              </div>
+
+              <button type="submit" className="form-btn" disabled={submitting}>
+                {submitting ? "Enviando..." : "Enviar mensaje"}
+              </button>
             </form>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#f0a500] rounded flex items-center justify-center"><span className="font-bold text-[#0d1b2a] text-xl font-['Syne']">V</span></div>
-            <span className="font-bold text-xl text-[#e2e8f0] font-['Syne']">Vértice Digital</span>
-          </div>
-          <p className="text-[#8892a4] text-sm">© 2025 Vértice Digital. Liberia, Guanacaste, Costa Rica.</p>
-        </div>
+      {/* FOOTER */}
+      <footer>
+        <a href="#" className="footer-brand">
+          <div className="nav-logo">V</div>
+          <span>Vértice Digital</span>
+        </a>
+        <span className="footer-copy">© 2025 Vértice Digital · Liberia, Guanacaste</span>
       </footer>
 
-      {/* WhatsApp Floating Button */}
-      <a href="https://wa.me/50687518055?text=Hola,%20me%20interesa%20conocer%20más%20sobre%20sus%20servicios" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:bg-[#128C7E] z-40 animate-pulse-whatsapp" data-testid="whatsapp-float-btn">
-        <MessageCircle size={28} fill="white" />
+      {/* WHATSAPP FLOAT */}
+      <a href="https://wa.me/50687518055" className="wa-float" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
       </a>
-
-      {/* Demo Booking Modal */}
-      {showDemoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowDemoModal(false)}>
-          <div className="bg-[#16213e] border border-white/10 rounded-lg w-full max-w-md p-8" onClick={(e) => e.stopPropagation()} data-testid="demo-modal">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-[#e2e8f0] font-['Syne']">Agendar Demostración</h3>
-              <button onClick={() => setShowDemoModal(false)} className="text-[#8892a4] hover:text-[#e2e8f0]"><X size={24} /></button>
-            </div>
-            <form onSubmit={handleDemoSubmit} className="space-y-4">
-              <div><label className="block text-[#8892a4] text-sm mb-1">Nombre</label><input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({...demoForm, name: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-3 py-2 text-[#e2e8f0]" data-testid="demo-name" /></div>
-              <div><label className="block text-[#8892a4] text-sm mb-1">Negocio</label><input type="text" required value={demoForm.business} onChange={(e) => setDemoForm({...demoForm, business: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-3 py-2 text-[#e2e8f0]" data-testid="demo-business" /></div>
-              <div><label className="block text-[#8892a4] text-sm mb-1">Teléfono</label><input type="tel" required value={demoForm.phone} onChange={(e) => setDemoForm({...demoForm, phone: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-3 py-2 text-[#e2e8f0]" data-testid="demo-phone" /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-[#8892a4] text-sm mb-1">Fecha</label><input type="date" required value={demoForm.date} onChange={(e) => setDemoForm({...demoForm, date: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-3 py-2 text-[#e2e8f0]" data-testid="demo-date" /></div>
-                <div><label className="block text-[#8892a4] text-sm mb-1">Hora</label><select required value={demoForm.time} onChange={(e) => setDemoForm({...demoForm, time: e.target.value})} className="w-full bg-[#0d1b2a] border border-white/10 rounded px-3 py-2 text-[#e2e8f0]" data-testid="demo-time"><option value="">Seleccionar</option>{DEMO_TIMES.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
-              </div>
-              <button type="submit" className="w-full bg-[#f0a500] text-[#0d1b2a] font-bold py-3 hover:bg-[#d49100] transition-colors" data-testid="demo-submit">Solicitar Demo por WhatsApp</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Exit Intent Popup */}
-      {showExitPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="bg-[#16213e] border border-[#f0a500]/30 rounded-lg w-full max-w-lg p-10 text-center relative" data-testid="exit-popup">
-            <button onClick={() => setShowExitPopup(false)} className="absolute top-4 right-4 text-[#8892a4] hover:text-[#e2e8f0]"><XCircle size={28} /></button>
-            <div className="inline-block bg-[#f0a500] text-[#0d1b2a] px-6 py-2 rounded-full text-sm font-bold mb-6">OFERTA ESPECIAL</div>
-            <h3 className="text-2xl font-bold text-[#e2e8f0] font-['Syne'] mb-4">¡Espera! No te vayas sin tu descuento</h3>
-            <p className="text-[#8892a4] mb-6">Obtén una <span className="text-[#f0a500] font-bold">consulta GRATIS</span> + 15% de descuento en tu primer proyecto. Solo por hoy.</p>
-            <button
-              onClick={() => {
-                window.open("https://wa.me/50687518055?text=Hola,%20vi%20la%20oferta%20especial%20en%20su%20sitio.%20Quiero%20mi%20consulta%20gratis%20y%20el%2015%25%20de%20descuento.", "_blank");
-                setShowExitPopup(false);
-              }}
-              className="bg-[#f0a500] text-[#0d1b2a] font-bold px-8 py-4 hover:bg-[#d49100] transition-colors text-lg"
-              data-testid="exit-popup-cta"
-            >
-              ¡Quiero mi descuento!
-            </button>
-            <p className="text-[#8892a4] text-xs mt-4 cursor-pointer hover:text-[#e2e8f0]" onClick={() => setShowExitPopup(false)}>No, gracias</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

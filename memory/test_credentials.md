@@ -6,8 +6,8 @@
 - **Password**: Vertice2025$
 
 ## API Endpoints
-- Backend: https://costa-rica-dev.preview.emergentagent.com/api
-- Frontend: https://costa-rica-dev.preview.emergentagent.com
+- Backend: https://web-builder-1461.preview.emergentagent.com/api
+- Frontend: https://web-builder-1461.preview.emergentagent.com
 
 ## Test Users
 | Role | Username | Password |
