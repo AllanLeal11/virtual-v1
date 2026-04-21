@@ -6,6 +6,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const SERVICES = [
   { key: "Sitios Web", icon: "🌐", name: "Sitios Web", desc: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", priceLabel: "₡150,000 – ₡600,000", min: 150000, max: 600000, features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
+  { key: "Guanacaste Concierge", icon: "🏨", name: "Concierge AI", desc: "Asistente inteligente para hoteles que gestiona reservas y dudas de huéspedes 24/7.", priceLabel: "Suscripción", min: 0, max: null, quote: true, features: ["FastAPI + OpenAI", "Integración Web", "Multilingüe", "Panel de control"] },
   { key: "WhatsApp Bot", icon: "💬", name: "WhatsApp Bot", desc: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", priceLabel: "₡200,000", min: 200000, max: null, features: ["Respuestas automáticas", "Catálogo de productos", "Atención 24/7", "Integración WhatsApp Business"] },
   { key: "Firma Fácil", icon: "✍️", name: "Firma Digital", desc: "Herramienta para simplificar el flujo de firma digital en portales del BCCR.", priceLabel: "Gratis", min: 0, max: null, features: ["Paso directo Gaudi", "Sin tarjeta física", "Flujo optimizado"] },
   { key: "Facturación Electrónica", icon: "🧾", name: "Facturación Electrónica", desc: "Sistema completo de facturación electrónica integrado con Hacienda Costa Rica.", priceLabel: "₡150,000", min: 150000, max: null, features: ["Integración Hacienda", "Facturas y notas", "Reportes", "Multi-usuario"] },
@@ -926,10 +927,11 @@ export default function LandingPage() {
           <div className="hero-visual">
             <div className="hero-card">
               <div className="hero-card-label">Nuestros servicios</div>
-              <div className="hero-card-num">6</div>
+              <div className="hero-card-num">7</div>
               <div className="hero-card-sub">Soluciones disponibles</div>
               <div className="hero-tags">
                 <span className="hero-tag-pill">Sitios Web</span>
+                <span className="hero-tag-pill">Concierge AI</span>
                 <span className="hero-tag-pill">WhatsApp Bot</span>
                 <span className="hero-tag-pill">Firma Digital</span>
                 <span className="hero-tag-pill">Facturación</span>
