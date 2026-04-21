@@ -758,15 +758,27 @@ export default function LandingPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
+  // Admin Access
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [passAttempt, setPassAttempt] = useState("");
+
   // Firma Digital States
   const [firmaStep, setFirmaStep] = useState(1);
   const [gaudiLink, setGaudiLink] = useState("");
   const [cedula, setCedula] = useState("");
   const [nextLink, setNextLink] = useState("");
 
+  const handleAdminAuth = () => {
+    if (passAttempt === "admin123") {
+      setIsAuthorized(true);
+      toast.success("Acceso concedido");
+    } else {
+      toast.error("Contraseña incorrecta");
+    }
+  };
+
   const handleFirmaProcess = () => {
     if (firmaStep === 1) {
-      // Updated validation to allow BCCR links directly
       if (!gaudiLink.toLowerCase().includes("bccr.fi.cr") && !gaudiLink.toLowerCase().includes("gaudi")) {
         toast.error("Por favor ingresa un link de Gaudi o BCCR válido.");
         return;
@@ -777,7 +789,6 @@ export default function LandingPage() {
         toast.error("Por favor ingresa tu cédula.");
         return;
       }
-      // Simulating generating the redirected link
       setNextLink("https://oauth2.bccr.fi.cr/personafisica/Account/Login?ReturnUrl=" + btoa(gaudiLink));
       setFirmaStep(3);
       toast.success("¡Link generado con éxito!");
@@ -852,7 +863,6 @@ export default function LandingPage() {
     }
     setSubmitting(true);
 
-    // Build summary of selected services from cotizador (if any)
     let extraContext = "";
     const selectedKeys = Object.keys(selected);
     if (selectedKeys.length > 0) {
@@ -894,7 +904,7 @@ export default function LandingPage() {
         </a>
         <ul className="nav-links">
           <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#firma">Firma Digital</a></li>
+          <li><a href="#firma">Admin Tools</a></li>
           <li><a href="#cotizador">Cotizador</a></li>
           <li><a href="#contacto">Contacto</a></li>
           <li><a href="#contacto" className="nav-cta">Hablemos</a></li>
@@ -907,7 +917,7 @@ export default function LandingPage() {
       {/* MOBILE MENU */}
       <div className={`mobile-menu ${mobileOpen ? "open" : ""}`}>
         <a href="#servicios" onClick={() => setMobileOpen(false)}>Servicios</a>
-        <a href="#firma" onClick={() => setMobileOpen(false)}>Firma Digital</a>
+        <a href="#firma" onClick={() => setMobileOpen(false)}>Admin Tools</a>
         <a href="#cotizador" onClick={() => setMobileOpen(false)}>Cotizador</a>
         <a href="#contacto" onClick={() => setMobileOpen(false)}>Contacto</a>
         <a href="#contacto" onClick={() => setMobileOpen(false)} style={{ color: "var(--gold)", fontWeight: 600 }}>Hablemos →</a>
@@ -969,62 +979,83 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FIRMA DIGITAL TOOL */}
+      {/* FIRMA DIGITAL TOOL (ADMIN PROTECTED) */}
       <section className="section" id="firma" style={{ background: "var(--surface)" }}>
         <div className="section-inner">
-          <span className="section-tag">Herramienta Gratuita</span>
+          <span className="section-tag">Acceso Administrativo</span>
           <h2 className="section-title">Firma Fácil CR</h2>
-          <p className="section-sub">Simplifica el proceso de firma digital. Pega tu link de Gaudi y genera el acceso directo.</p>
+          <p className="section-sub">Esta herramienta está protegida. Ingresa la contraseña de administrador para continuar.</p>
 
           <div className="firma-tool">
-            {firmaStep === 1 && (
+            {!isAuthorized ? (
               <>
-                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 1: Link de Gaudi</h3>
+                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Control de Acceso</h3>
                 <input
-                  type="text"
+                  type="password"
                   className="firma-input"
-                  placeholder="Pega el link de Gaudi aquí..."
-                  value={gaudiLink}
-                  onChange={(e) => setGaudiLink(e.target.value)}
+                  placeholder="Contraseña de admin..."
+                  value={passAttempt}
+                  onChange={(e) => setPassAttempt(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAdminAuth()}
                 />
-                <button className="btn-primary" onClick={handleFirmaProcess}>Siguiente</button>
+                <button className="btn-primary" onClick={handleAdminAuth}>Ingresar</button>
               </>
-            )}
-
-            {firmaStep === 2 && (
+            ) : (
               <>
-                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 2: Datos Adicionales</h3>
-                <input
-                  type="text"
-                  className="firma-input"
-                  placeholder="Número de cédula..."
-                  value={cedula}
-                  onChange={(e) => setCedula(e.target.value)}
-                />
-                <button className="btn-primary" onClick={handleFirmaProcess}>Generar Link</button>
-                <button
-                  style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
-                  onClick={() => setFirmaStep(1)}
-                >← Volver</button>
-              </>
-            )}
+                {firmaStep === 1 && (
+                  <>
+                    <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 1: Link de Gaudi</h3>
+                    <input
+                      type="text"
+                      className="firma-input"
+                      placeholder="Pega el link de Gaudi o BCCR aquí..."
+                      value={gaudiLink}
+                      onChange={(e) => setGaudiLink(e.target.value)}
+                    />
+                    <button className="btn-primary" onClick={handleFirmaProcess}>Siguiente</button>
+                  </>
+                )}
 
-            {firmaStep === 3 && (
-              <>
-                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>¡Listo!</h3>
-                <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>Copia el siguiente link para continuar con tu trámite:</p>
-                <div className="firma-result">
-                  {nextLink}
-                </div>
+                {firmaStep === 2 && (
+                  <>
+                    <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 2: Datos Adicionales</h3>
+                    <input
+                      type="text"
+                      className="firma-input"
+                      placeholder="Número de cédula..."
+                      value={cedula}
+                      onChange={(e) => setCedula(e.target.value)}
+                    />
+                    <button className="btn-primary" onClick={handleFirmaProcess}>Generar Link</button>
+                    <button
+                      style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
+                      onClick={() => setFirmaStep(1)}
+                    >← Volver</button>
+                  </>
+                )}
+
+                {firmaStep === 3 && (
+                  <>
+                    <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>¡Listo!</h3>
+                    <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>Link generado exitosamente:</p>
+                    <div className="firma-result">
+                      {nextLink}
+                    </div>
+                    <button
+                      className="btn-primary"
+                      style={{ marginTop: "20px" }}
+                      onClick={() => window.open(nextLink, "_blank")}
+                    >Ir al sitio del BCCR</button>
+                    <button
+                      style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
+                      onClick={() => { setFirmaStep(1); setGaudiLink(""); setCedula(""); }}
+                    >Nueva consulta</button>
+                  </>
+                )}
                 <button
-                  className="btn-primary"
-                  style={{ marginTop: "20px" }}
-                  onClick={() => window.open(nextLink, "_blank")}
-                >Ir al sitio del BCCR</button>
-                <button
-                  style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
-                  onClick={() => { setFirmaStep(1); setGaudiLink(""); setCedula(""); }}
-                >Nueva consulta</button>
+                  style={{ marginTop: "40px", background: "none", border: "1px solid var(--border)", color: "var(--muted)", padding: "8px 16px", borderRadius: "8px", cursor: "pointer" }}
+                  onClick={() => setIsAuthorized(false)}
+                >Cerrar Sesión Admin</button>
               </>
             )}
           </div>
