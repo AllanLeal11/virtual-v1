@@ -7,6 +7,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const SERVICES = [
   { key: "Sitios Web", icon: "🌐", name: "Sitios Web", desc: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", priceLabel: "₡150,000 – ₡600,000", min: 150000, max: 600000, features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
   { key: "WhatsApp Bot", icon: "💬", name: "WhatsApp Bot", desc: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", priceLabel: "₡200,000", min: 200000, max: null, features: ["Respuestas automáticas", "Catálogo de productos", "Atención 24/7", "Integración WhatsApp Business"] },
+  { key: "Firma Fácil", icon: "✍️", name: "Firma Digital", desc: "Herramienta para simplificar el flujo de firma digital en portales del BCCR.", priceLabel: "Gratis", min: 0, max: null, features: ["Paso directo Gaudi", "Sin tarjeta física", "Flujo optimizado"] },
   { key: "Facturación Electrónica", icon: "🧾", name: "Facturación Electrónica", desc: "Sistema completo de facturación electrónica integrado con Hacienda Costa Rica.", priceLabel: "₡150,000", min: 150000, max: null, features: ["Integración Hacienda", "Facturas y notas", "Reportes", "Multi-usuario"] },
   { key: "Sistema POS", icon: "🛒", name: "Sistema POS", desc: "Punto de venta moderno para gestionar tu negocio de forma eficiente.", priceLabel: "₡400,000", min: 400000, max: null, features: ["Inventario", "Ventas", "Reportes", "Multi-sucursal"] },
   { key: "Automatizaciones", icon: "⚡", name: "Automatizaciones", desc: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", priceLabel: "Cotización", min: 0, max: null, quote: true, features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] },
@@ -359,6 +360,37 @@ const STYLES = `
     flex-shrink: 0;
   }
 
+  /* FIRMA TOOL */
+  .vd-root .firma-tool {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+  }
+  .vd-root .firma-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 12px 15px;
+    margin-bottom: 16px;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .vd-root .firma-input:focus { border-color: var(--gold); }
+  .vd-root .firma-result {
+    background: rgba(245,166,35,0.05);
+    border: 1px dashed var(--gold);
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+    word-break: break-all;
+  }
+
   /* COTIZADOR */
   .vd-root #cotizador {
     background: var(--surface);
@@ -566,7 +598,9 @@ const STYLES = `
     padding: 32px;
   }
 
-  .vd-root .form-group { margin-bottom: 18px; }
+  .vd-root .form-group {
+    margin-bottom: 18px;
+  }
 
   .vd-root .form-group label {
     display: block;
@@ -723,6 +757,31 @@ export default function LandingPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
+  // Firma Digital States
+  const [firmaStep, setFirmaStep] = useState(1);
+  const [gaudiLink, setGaudiLink] = useState("");
+  const [cedula, setCedula] = useState("");
+  const [nextLink, setNextLink] = useState("");
+
+  const handleFirmaProcess = () => {
+    if (firmaStep === 1) {
+      if (!gaudiLink.toLowerCase().includes("gaudi")) {
+        toast.error("Por favor ingresa un link de Gaudi válido.");
+        return;
+      }
+      setFirmaStep(2);
+    } else if (firmaStep === 2) {
+      if (!cedula) {
+        toast.error("Por favor ingresa tu cédula.");
+        return;
+      }
+      // Simulating generating the redirected link
+      setNextLink("https://oauth2.bccr.fi.cr/personafisica/Account/Login?ReturnUrl=" + btoa(gaudiLink));
+      setFirmaStep(3);
+      toast.success("¡Link generado con éxito!");
+    }
+  };
+
   const toggleService = (svc) => {
     setSelected((prev) => {
       const next = { ...prev };
@@ -804,11 +863,9 @@ export default function LandingPage() {
       await axios.post(`${API}/contact`, form);
       toast.success("¡Mensaje recibido! Abriendo WhatsApp...");
       const waUrl = buildWhatsAppUrl(form, extraContext);
-      // Open WhatsApp in a new tab
       window.open(waUrl, "_blank", "noopener,noreferrer");
       setForm({ name: "", email: "", phone: "", service: "", message: "" });
     } catch (err) {
-      // Even if backend fails, still try to send via WhatsApp so user isn't blocked
       toast.error("Guardado falló, pero te redirigimos a WhatsApp.");
       const waUrl = buildWhatsAppUrl(form, extraContext);
       window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -835,6 +892,7 @@ export default function LandingPage() {
         </a>
         <ul className="nav-links">
           <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#firma">Firma Digital</a></li>
           <li><a href="#cotizador">Cotizador</a></li>
           <li><a href="#contacto">Contacto</a></li>
           <li><a href="#contacto" className="nav-cta">Hablemos</a></li>
@@ -847,6 +905,7 @@ export default function LandingPage() {
       {/* MOBILE MENU */}
       <div className={`mobile-menu ${mobileOpen ? "open" : ""}`}>
         <a href="#servicios" onClick={() => setMobileOpen(false)}>Servicios</a>
+        <a href="#firma" onClick={() => setMobileOpen(false)}>Firma Digital</a>
         <a href="#cotizador" onClick={() => setMobileOpen(false)}>Cotizador</a>
         <a href="#contacto" onClick={() => setMobileOpen(false)}>Contacto</a>
         <a href="#contacto" onClick={() => setMobileOpen(false)} style={{ color: "var(--gold)", fontWeight: 600 }}>Hablemos →</a>
@@ -867,11 +926,12 @@ export default function LandingPage() {
           <div className="hero-visual">
             <div className="hero-card">
               <div className="hero-card-label">Nuestros servicios</div>
-              <div className="hero-card-num">5</div>
+              <div className="hero-card-num">6</div>
               <div className="hero-card-sub">Soluciones disponibles</div>
               <div className="hero-tags">
                 <span className="hero-tag-pill">Sitios Web</span>
                 <span className="hero-tag-pill">WhatsApp Bot</span>
+                <span className="hero-tag-pill">Firma Digital</span>
                 <span className="hero-tag-pill">Facturación</span>
                 <span className="hero-tag-pill">Sistema POS</span>
                 <span className="hero-tag-pill">Automatizaciones</span>
@@ -902,6 +962,68 @@ export default function LandingPage() {
                 </ul>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FIRMA DIGITAL TOOL */}
+      <section className="section" id="firma" style={{ background: "var(--surface)" }}>
+        <div className="section-inner">
+          <span className="section-tag">Herramienta Gratuita</span>
+          <h2 className="section-title">Firma Fácil CR</h2>
+          <p className="section-sub">Simplifica el proceso de firma digital. Pega tu link de Gaudi y genera el acceso directo.</p>
+
+          <div className="firma-tool">
+            {firmaStep === 1 && (
+              <>
+                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 1: Link de Gaudi</h3>
+                <input
+                  type="text"
+                  className="firma-input"
+                  placeholder="Pega el link de Gaudi aquí..."
+                  value={gaudiLink}
+                  onChange={(e) => setGaudiLink(e.target.value)}
+                />
+                <button className="btn-primary" onClick={handleFirmaProcess}>Siguiente</button>
+              </>
+            )}
+
+            {firmaStep === 2 && (
+              <>
+                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>Paso 2: Datos Adicionales</h3>
+                <input
+                  type="text"
+                  className="firma-input"
+                  placeholder="Número de cédula..."
+                  value={cedula}
+                  onChange={(e) => setCedula(e.target.value)}
+                />
+                <button className="btn-primary" onClick={handleFirmaProcess}>Generar Link</button>
+                <button
+                  style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
+                  onClick={() => setFirmaStep(1)}
+                >← Volver</button>
+              </>
+            )}
+
+            {firmaStep === 3 && (
+              <>
+                <h3 style={{ marginBottom: "16px", fontFamily: "'Syne'" }}>¡Listo!</h3>
+                <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>Copia el siguiente link para continuar con tu trámite:</p>
+                <div className="firma-result">
+                  {nextLink}
+                </div>
+                <button
+                  className="btn-primary"
+                  style={{ marginTop: "20px" }}
+                  onClick={() => window.open(nextLink, "_blank")}
+                >Ir al sitio del BCCR</button>
+                <button
+                  style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", marginTop: "10px", display: "block", width: "100%" }}
+                  onClick={() => { setFirmaStep(1); setGaudiLink(""); setCedula(""); }}
+                >Nueva consulta</button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -1056,6 +1178,7 @@ export default function LandingPage() {
                   <option value="">Seleccionar…</option>
                   <option>Sitio Web</option>
                   <option>WhatsApp Bot</option>
+                  <option>Firma Digital</option>
                   <option>Facturación Electrónica</option>
                   <option>Sistema POS</option>
                   <option>Automatizaciones</option>
