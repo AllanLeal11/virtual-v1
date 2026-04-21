@@ -766,8 +766,9 @@ export default function LandingPage() {
 
   const handleFirmaProcess = () => {
     if (firmaStep === 1) {
-      if (!gaudiLink.toLowerCase().includes("gaudi")) {
-        toast.error("Por favor ingresa un link de Gaudi válido.");
+      // Updated validation to allow BCCR links directly
+      if (!gaudiLink.toLowerCase().includes("bccr.fi.cr") && !gaudiLink.toLowerCase().includes("gaudi")) {
+        toast.error("Por favor ingresa un link de Gaudi o BCCR válido.");
         return;
       }
       setFirmaStep(2);
