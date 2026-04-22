@@ -1239,7 +1239,7 @@ export default function LandingPage() {
           <div className="nav-logo">V</div>
           <span>Vértice Digital</span>
         </a>
-        <span className="footer-copy">© 2025 Vértice Digital · Liberia, Guanacaste</span>
+        <span className="footer-copy">© 2025 Vértice Digital </span>
       </footer>
 
       {/* WHATSAPP FLOAT */}
