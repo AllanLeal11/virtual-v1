@@ -846,10 +846,10 @@ const LandingPage = () => {
             </a>
             <a
               className="vd-vip-card-cta outline"
-              href={`${VIP_APP_URL}/simulator`}
+              href={`${VIP_APP_URL}/demo`}
               target="_blank"
               rel="noopener noreferrer"
-              data-testid="vip-cta-simulator"
+              data-testid="vip-cta-demo"
             >
               Probar simulador
             </a>
