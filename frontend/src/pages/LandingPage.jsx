@@ -14,6 +14,59 @@ const SERVICES = [
   { key: "Automatizaciones", icon: "⚡", name: "Automatizaciones", desc: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", priceLabel: "Cotización", min: 0, max: null, quote: true, features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] },
 ];
 
+// URL pública del producto WhatsApp VIP Business (SaaS independiente).
+// Cambia esta variable o define REACT_APP_VIP_URL en Railway para apuntar a tu dominio final.
+const VIP_APP_URL =
+  process.env.REACT_APP_VIP_URL || "https://whatsapp-vip-business.replit.app";
+
+const VIP_PLANS = [
+  {
+    key: "starter",
+    name: "Básico",
+    price: "$29",
+    period: "/mes",
+    tagline: "Para arrancar y probar el bot oficial.",
+    features: [
+      "1 número WhatsApp Business API",
+      "Hasta 1.000 conversaciones/mes",
+      "Plantillas IA precargadas",
+      "Anti-baneo automático",
+    ],
+    cta: "Empezar Básico",
+  },
+  {
+    key: "pro",
+    name: "Pro",
+    price: "$59",
+    period: "/mes",
+    tagline: "El más elegido por restaurantes y hoteles.",
+    popular: true,
+    features: [
+      "Todo lo del plan Básico",
+      "Hasta 5.000 conversaciones/mes",
+      "Modo Pánico + alertas en vivo",
+      "Simulador de chat y ROI",
+      "Configuración Cero Estrés",
+    ],
+    cta: "Activar Pro",
+  },
+  {
+    key: "premium",
+    name: "Premium",
+    price: "$149",
+    period: "/mes",
+    tagline: "Para operaciones serias y multi-sucursal.",
+    features: [
+      "Todo lo del plan Pro",
+      "Conversaciones ilimitadas",
+      "Multi-sucursal / multi-agente",
+      "Integración n8n + CRM",
+      "Soporte prioritario 24/7",
+    ],
+    cta: "Activar Premium",
+  },
+];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -409,12 +462,215 @@ const styles = `
   }
   .vd-footer strong { color: var(--text); font-family: 'Syne', sans-serif; }
 
+  /* WHATSAPP VIP SECTION */
+  .vd-vip {
+    padding: 5rem 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .vd-vip::before {
+    content: '';
+    position: absolute;
+    top: 10%; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse at center, rgba(0,229,160,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .vd-vip-head {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 3rem;
+  }
+  .vd-vip-eyebrow {
+    display: inline-block;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.1rem;
+    border-radius: 100px;
+    margin-bottom: 1.4rem;
+  }
+  .vd-vip-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .vd-vip-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .vd-vip-sub {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 620px;
+    margin: 0 auto 1.8rem;
+  }
+  .vd-vip-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .vd-vip-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+  }
+  .vd-vip-pill em {
+    color: var(--accent);
+    font-style: normal;
+    margin-right: 0.35rem;
+  }
+  .vd-vip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2.5rem;
+  }
+  .vd-vip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .vd-vip-card:hover {
+    background: var(--card-hover);
+    border-color: rgba(0,229,160,0.25);
+    transform: translateY(-3px);
+  }
+  .vd-vip-card.popular {
+    border-color: rgba(0,229,160,0.5);
+    background: linear-gradient(180deg, rgba(0,229,160,0.05) 0%, var(--surface) 60%);
+  }
+  .vd-vip-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #0a0a0f;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.9rem;
+    border-radius: 100px;
+  }
+  .vd-vip-plan-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .vd-vip-plan-tag {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.4rem;
+    line-height: 1.5;
+  }
+  .vd-vip-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    margin-bottom: 1.6rem;
+  }
+  .vd-vip-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .vd-vip-period {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .vd-vip-feats {
+    list-style: none;
+    margin: 0 0 1.8rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+  }
+  .vd-vip-feats li {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+  .vd-vip-feats li::before {
+    content: '✓';
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .vd-vip-card-cta {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    padding: 0.8rem 1.4rem;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .vd-vip-card-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+  .vd-vip-card-cta.outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .vd-vip-card-cta.outline:hover {
+    border-color: rgba(0,229,160,0.4);
+  }
+  .vd-vip-foot {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
   /* SCROLL REVEAL */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(24px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .vd-card { animation: fadeUp 0.4s ease both; }
+  .vd-vip-card { animation: fadeUp 0.5s ease both; }
   ${SERVICES.map((_, i) => `.vd-card:nth-child(${i + 1}) { animation-delay: ${i * 0.05}s; }`).join('\n  ')}
 
   @media (max-width: 640px) {
@@ -479,7 +735,17 @@ const LandingPage = () => {
         {/* NAV */}
         <nav className="vd-nav">
           <div className="vd-logo">Vertice<span>.</span>Digital</div>
-          <button className="vd-nav-cta" onClick={scrollToForm}>Cotizar proyecto</button>
+          <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+            <button
+              className="vd-btn-secondary"
+              style={{ padding: "0.5rem 1.1rem", fontSize: "0.85rem" }}
+              onClick={() => document.getElementById("vd-whatsapp-vip")?.scrollIntoView({ behavior: "smooth" })}
+              data-testid="nav-vip"
+            >
+              WhatsApp VIP
+            </button>
+            <button className="vd-nav-cta" onClick={scrollToForm}>Cotizar proyecto</button>
+          </div>
         </nav>
 
         {/* HERO */}
@@ -515,6 +781,80 @@ const LandingPage = () => {
             </div>
           ))}
         </div>
+
+        {/* WHATSAPP VIP BUSINESS — sección destacada */}
+        <section className="vd-vip" id="vd-whatsapp-vip">
+          <div className="vd-vip-head">
+            <div className="vd-vip-eyebrow">⭐ Producto Premium · IA</div>
+            <h2 className="vd-vip-title">
+              WhatsApp <em>VIP Business</em>
+            </h2>
+            <p className="vd-vip-sub">
+              El asistente oficial de WhatsApp con IA que vende, agenda y atiende
+              por ti — sin baneos, sin estrés, en español. Activación guiada,
+              modo pánico y simulador de conversaciones incluidos.
+            </p>
+            <div className="vd-vip-pills">
+              <div className="vd-vip-pill"><em>✓</em>Anti-baneo oficial</div>
+              <div className="vd-vip-pill"><em>✓</em>IA 24/7 en español</div>
+              <div className="vd-vip-pill"><em>✓</em>Setup Cero Estrés</div>
+              <div className="vd-vip-pill"><em>✓</em>Modo Pánico</div>
+            </div>
+          </div>
+
+          <div className="vd-vip-grid">
+            {VIP_PLANS.map((plan) => (
+              <div
+                key={plan.key}
+                className={`vd-vip-card${plan.popular ? " popular" : ""}`}
+                data-testid={`vip-plan-${plan.key}`}
+              >
+                {plan.popular && <div className="vd-vip-badge">Más popular</div>}
+                <div className="vd-vip-plan-name">{plan.name}</div>
+                <div className="vd-vip-plan-tag">{plan.tagline}</div>
+                <div className="vd-vip-price-row">
+                  <span className="vd-vip-price">{plan.price}</span>
+                  <span className="vd-vip-period">{plan.period}</span>
+                </div>
+                <ul className="vd-vip-feats">
+                  {plan.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                <a
+                  className="vd-vip-card-cta"
+                  href={`${VIP_APP_URL}/pricing?plan=${plan.key}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid={`vip-cta-${plan.key}`}
+                >
+                  {plan.cta} →
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <div className="vd-vip-foot">
+            <a
+              className="vd-vip-card-cta"
+              href={`${VIP_APP_URL}/demo`}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="vip-cta-demo"
+            >
+              Ver demo en vivo →
+            </a>
+            <a
+              className="vd-vip-card-cta outline"
+              href={`${VIP_APP_URL}/simulator`}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="vip-cta-simulator"
+            >
+              Probar simulador
+            </a>
+          </div>
+        </section>
 
         {/* SERVICES */}
         <section className="vd-section" id="vd-services">
