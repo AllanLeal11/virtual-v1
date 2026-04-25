@@ -17,7 +17,7 @@ const SERVICES = [
 // URL pública del producto WhatsApp VIP Business (SaaS independiente).
 // Cambia esta variable o define REACT_APP_VIP_URL en Railway para apuntar a tu dominio final.
 const VIP_APP_URL =
-  process.env.REACT_APP_VIP_URL || "https://whatsapp-vip-business.replit.app";
+  process.env.REACT_APP_VIP_URL || "https://premium-whats-app--verticedigital1.replit.app";
 
 const VIP_PLANS = [
   {
@@ -846,10 +846,10 @@ const LandingPage = () => {
             </a>
             <a
               className="vd-vip-card-cta outline"
-              href={`${VIP_APP_URL}/demo`}
+              href={`${VIP_APP_URL}/simulator`}
               target="_blank"
               rel="noopener noreferrer"
-              data-testid="vip-cta-demo"
+              data-testid="vip-cta-simulator"
             >
               Probar simulador
             </a>
