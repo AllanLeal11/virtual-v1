@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -603,6 +605,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============== SERVE REACT FRONTEND ==============
+
+FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
+
+if FRONTEND_BUILD.exists():
+    # CRA bundles (JS, CSS, assets compilados)
+    app.mount(
+        "/static",
+        StaticFiles(directory=FRONTEND_BUILD / "static"),
+        name="static",
+    )
+
+    @app.get("/{full_path:path}")
+    async def serve_react(full_path: str):
+        # No interceptar las rutas de API
+        if full_path.startswith("api/") or full_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        # Servir archivos específicos si existen (favicon, manifest, robots.txt, etc.)
+        target = FRONTEND_BUILD / full_path
+        if target.is_file():
+            return FileResponse(target)
+
+        # Fallback al index.html (React Router maneja el routing del cliente)
+        index_file = FRONTEND_BUILD / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+
+        raise HTTPException(status_code=404, detail="Frontend build not found")
+else:
+    logger.warning(f"Frontend build folder not found at {FRONTEND_BUILD}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
