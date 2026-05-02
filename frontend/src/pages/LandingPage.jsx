@@ -15,9 +15,11 @@ const SERVICES = [
 ];
 
 // URL pública del producto WhatsApp VIP Business (SaaS independiente).
-// Cambia esta variable o define REACT_APP_VIP_URL en Railway para apuntar a tu dominio final.
 const VIP_APP_URL =
   process.env.REACT_APP_VIP_URL || "https://premium-whats-app--verticedigital1.replit.app";
+
+// URL pública del asistente Aria
+const ARIA_URL = process.env.REACT_APP_ARIA_URL || "https://aria-asistente.vercel.app";
 
 const VIP_PLANS = [
   {
@@ -664,6 +666,54 @@ const styles = `
     gap: 0.8rem;
   }
 
+  /* ARIA WIDGET */
+  .vd-aria-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #00e5a0, #7b5ea7);
+    color: #0a0a0f;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,229,160,0.35), 0 0 0 1px rgba(0,229,160,0.2);
+    z-index: 9999;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .vd-aria-fab:hover {
+    transform: scale(1.06);
+    box-shadow: 0 14px 40px rgba(0,229,160,0.5);
+  }
+  .vd-aria-fab.open {
+    background: linear-gradient(135deg, #1a1a26, #12121a);
+    color: var(--text);
+  }
+  .vd-aria-frame {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 380px;
+    height: 580px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 130px);
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,160,0.15);
+    z-index: 9998;
+    background: #0a0a0f;
+    animation: ariaSlide 0.25s ease;
+  }
+  @keyframes ariaSlide {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
   /* SCROLL REVEAL */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(24px); }
@@ -687,6 +737,7 @@ const LandingPage = () => {
   const [form, setForm] = useState({ name: "", email: "", phone: "", budget: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
+  const [ariaOpen, setAriaOpen] = useState(false);
 
   const toggleService = (key) => {
     setSelected((prev) =>
@@ -995,6 +1046,24 @@ const LandingPage = () => {
           </p>
           <p style={{ marginTop: "0.4rem" }}>Diseño · Desarrollo · Automatización con IA</p>
         </footer>
+
+        {/* ARIA — Asistente IA flotante */}
+        {ariaOpen && (
+          <iframe
+            src={ARIA_URL}
+            title="Aria - Asistente Vertice Digital"
+            allow="microphone; autoplay"
+            className="vd-aria-frame"
+          />
+        )}
+        <button
+          className={`vd-aria-fab${ariaOpen ? " open" : ""}`}
+          onClick={() => setAriaOpen((v) => !v)}
+          aria-label={ariaOpen ? "Cerrar asistente" : "Abrir asistente Aria"}
+          data-testid="aria-toggle"
+        >
+          {ariaOpen ? "✕" : "💬"}
+        </button>
 
       </div>
     </>
