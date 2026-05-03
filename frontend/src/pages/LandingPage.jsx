@@ -19,7 +19,7 @@ const VIP_APP_URL =
   process.env.REACT_APP_VIP_URL || "https://premium-whats-app--verticedigital1.replit.app";
 
 // URL pública del asistente Aria
-const ARIA_URL = process.env.REACT_APP_ARIA_URL || "https://aria-asistente.vercel.app";
+const ARIA_URL = process.env.REACT_APP_ARIA_URL || "https://aria-asistente-84p7.vercel.app";
 
 const VIP_PLANS = [
   {
