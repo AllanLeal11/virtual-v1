@@ -874,9 +874,7 @@ const LandingPage = () => {
                 </ul>
                 <a
                   className="vd-vip-card-cta"
-                  href={`${VIP_APP_URL}/pricing?plan=${plan.key}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/vip/checkout?plan=${plan.key}`}
                   data-testid={`vip-cta-${plan.key}`}
                 >
                   {plan.cta} →
@@ -888,21 +886,19 @@ const LandingPage = () => {
           <div className="vd-vip-foot">
             <a
               className="vd-vip-card-cta"
-              href={`${VIP_APP_URL}/demo`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/vip/checkout?plan=pro"
               data-testid="vip-cta-demo"
             >
-              Ver demo en vivo →
+              Activar ahora →
             </a>
             <a
               className="vd-vip-card-cta outline"
-              href={`${VIP_APP_URL}/simulator`}
+              href="https://wa.me/50687518055?text=Hola!%20Quiero%20ver%20una%20demo%20de%20WhatsApp%20VIP"
               target="_blank"
               rel="noopener noreferrer"
               data-testid="vip-cta-simulator"
             >
-              Probar simulador
+              💬 Pedir demo por WhatsApp
             </a>
           </div>
         </section>
