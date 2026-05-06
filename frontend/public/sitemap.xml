@@ -2,29 +2,29 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://www.verticedigita.space/</loc>
+    <loc>https://www.verticedigital.space/</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://www.verticedigita.space/favicon.svg</image:loc>
+      <image:loc>https://www.verticedigital.space/favicon.svg</image:loc>
       <image:title>Vértice Digital - Tecnología para Guanacaste</image:title>
     </image:image>
   </url>
   <url>
-    <loc>https://www.verticedigita.space/#servicios</loc>
+    <loc>https://www.verticedigital.space/#servicios</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.verticedigita.space/#contacto</loc>
+    <loc>https://www.verticedigital.space/#contacto</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.verticedigita.space/#aria</loc>
+    <loc>https://www.verticedigital.space/#aria</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>

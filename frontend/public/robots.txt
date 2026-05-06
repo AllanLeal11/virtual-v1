@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://www.verticedigita.space/sitemap.xml
+Sitemap: https://www.verticedigital.space/sitemap.xml
 
 # Crawl-delay para bots agresivos
 User-agent: AhrefsBot
