@@ -598,6 +598,11 @@ async def get_agents(payload: dict = Depends(verify_token)):
 # Include the router in the main app
 app.include_router(api_router)
 
+# ============== WHATSAPP VIP SaaS ==============
+from vip import vip_router, init_db as vip_init_db
+vip_init_db(db)
+app.include_router(vip_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
