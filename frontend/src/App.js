@@ -9,6 +9,7 @@ import PagoPaypal from "./pages/vip/PagoPaypal";
 import PagoUsdt from "./pages/vip/PagoUsdt";
 import Confirmacion from "./pages/vip/Confirmacion";
 import Configuracion from "./pages/vip/Configuracion";
+import AdminVip from "./pages/vip/AdminVip";
 import { Toaster } from "./components/ui/sonner";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/vip/pago/usdt/:orderId" element={<PagoUsdt />} />
           <Route path="/vip/confirmacion/:orderId" element={<Confirmacion />} />
           <Route path="/vip/configuracion" element={<Configuracion />} />
+          <Route path="/vip/admin" element={<AdminVip />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />

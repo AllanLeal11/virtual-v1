@@ -6,12 +6,14 @@ import os
 import secrets
 import uuid
 import logging
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional, List
 
 import jwt
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Header
+import requests
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Header, BackgroundTasks
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -23,6 +25,11 @@ JWT_SECRET = os.environ.get("JWT_SECRET", "vertice_secret_2025")
 JWT_ALGORITHM = "HS256"
 USD_TO_CRC = float(os.environ.get("USD_TO_CRC", "510"))
 ADMIN_TOKEN = os.environ.get("VIP_ADMIN_TOKEN", "vip-admin-change-me")
+
+# Notificación a tu WhatsApp cuando llega un pago para aprobar
+ADMIN_WHATSAPP = os.environ.get("ADMIN_WHATSAPP", "+50687518055")
+CALLMEBOT_API_KEY = os.environ.get("CALLMEBOT_API_KEY", "")
+VIP_WEBHOOK_URL = os.environ.get("VIP_WEBHOOK_URL", "")  # Make.com / Zapier
 
 PLANS = {
     "starter": {"name": "Básico", "price_usd": 29, "max_conversations": 1000},
@@ -144,6 +151,61 @@ def check_admin(token: Optional[str]) -> None:
         raise HTTPException(status_code=401, detail="No autorizado")
 
 
+def notify_admin_new_payment(order: dict) -> None:
+    """Avisa por WhatsApp + webhook que hay un pago para aprobar."""
+    plan = (order.get("plan") or "?").upper()
+    method = (order.get("method") or "?").upper()
+    email = order.get("email", "?")
+    phone = order.get("phone", "?")
+    amount = order.get("amount_usd", 0)
+    order_id = str(order.get("_id", ""))[-6:]
+    reference = order.get("sinpe_reference") or order.get("tx_hash") or "—"
+
+    text = (
+        f"💰 NUEVO PAGO VIP por aprobar\n\n"
+        f"Plan: {plan} (${amount} USD)\n"
+        f"Método: {method}\n"
+        f"Cliente: {email}\n"
+        f"WhatsApp: {phone}\n"
+        f"Referencia: {reference}\n"
+        f"Order ID: VIP-{order_id}\n\n"
+        f"Aprobar: /api/vip/admin/orders/{order.get('_id')}/approve"
+    )
+
+    # 1. WhatsApp via CallMeBot (gratis)
+    if CALLMEBOT_API_KEY and ADMIN_WHATSAPP:
+        try:
+            phone_clean = ADMIN_WHATSAPP.replace("+", "").replace(" ", "").replace("-", "")
+            url = (
+                f"https://api.callmebot.com/whatsapp.php"
+                f"?phone={phone_clean}"
+                f"&text={urllib.parse.quote(text)}"
+                f"&apikey={CALLMEBOT_API_KEY}"
+            )
+            requests.get(url, timeout=5)
+            logger.info(f"WhatsApp notification sent for order {order_id}")
+        except Exception as e:
+            logger.warning(f"CallMeBot failed: {e}")
+
+    # 2. Webhook Make.com / Zapier
+    if VIP_WEBHOOK_URL:
+        try:
+            requests.post(VIP_WEBHOOK_URL, json={
+                "event": "vip_payment_pending",
+                "order_id": str(order.get("_id")),
+                "plan": plan,
+                "method": method,
+                "amount_usd": amount,
+                "amount_crc": order.get("amount_crc"),
+                "email": email,
+                "phone": phone,
+                "reference": reference,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }, timeout=5)
+        except Exception as e:
+            logger.warning(f"VIP webhook failed: {e}")
+
+
 async def activate_order(order_id: str) -> str:
     """Marca una orden como pagada y crea el usuario VIP. Devuelve access_token."""
     order = await db.vip_orders.find_one({"_id": order_id})
@@ -257,6 +319,11 @@ async def upload_sinpe_proof(
         update["sinpe_screenshot"] = str(filename)
 
     await db.vip_orders.update_one({"_id": order_id}, {"$set": update})
+
+    # Avisarle al admin (vos) que hay pago pendiente
+    updated = await db.vip_orders.find_one({"_id": order_id})
+    notify_admin_new_payment(updated)
+
     return {"ok": True, "message": "Comprobante recibido. Te avisamos al activar."}
 
 
@@ -274,8 +341,11 @@ async def confirm_crypto(order_id: str, req: CryptoConfirmRequest):
             "submitted_at": datetime.now(timezone.utc).isoformat(),
         }}
     )
-    # TODO: validación on-chain automática (Etherscan/TronScan API)
-    # Por ahora queda en "processing" hasta que admin apruebe manualmente
+
+    # Avisarle al admin (vos) que hay crypto pendiente
+    updated = await db.vip_orders.find_one({"_id": order_id})
+    notify_admin_new_payment(updated)
+
     return {"ok": True, "message": "Hash recibido, validando en blockchain."}
 
 
