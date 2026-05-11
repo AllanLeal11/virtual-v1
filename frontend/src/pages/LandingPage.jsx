@@ -464,6 +464,42 @@ const styles = `
   }
   .vd-footer strong { color: var(--text); font-family: 'Syne', sans-serif; }
 
+  /* GOOGLE CLOUD CERTIFIED BADGE */
+  .vd-cert-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, rgba(0,229,160,0.08), rgba(123,94,167,0.08));
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 50px;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .vd-cert-badge:hover {
+    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(123,94,167,0.15));
+    border-color: #00e5a0;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,229,160,0.15);
+  }
+  .vd-cert-icon { font-size: 28px; }
+  .vd-cert-text { display: flex; flex-direction: column; text-align: left; }
+  .vd-cert-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+  .vd-cert-sub {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
   /* WHATSAPP VIP SECTION */
   .vd-vip {
     padding: 5rem 2.5rem;
@@ -1037,7 +1073,20 @@ const LandingPage = () => {
 
         {/* FOOTER */}
         <footer className="vd-footer">
-          <p>
+          <a
+            href="https://www.credly.com/badges/3d85e2fa-1dfe-45ab-8f42-18fabe3ef521"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="vd-cert-badge"
+            title="Google Cloud Certified - 8 specializations"
+          >
+            <span className="vd-cert-icon">🏆</span>
+            <span className="vd-cert-text">
+              <span className="vd-cert-title">Google Cloud Certified</span>
+              <span className="vd-cert-sub">8 specializations · Verified on Credly</span>
+            </span>
+          </a>
+          <p style={{ marginTop: "1.5rem" }}>
             <strong>Vertice Digital</strong> · Guanacaste, Costa Rica · {new Date().getFullYear()}
           </p>
           <p style={{ marginTop: "0.4rem" }}>Diseño · Desarrollo · Automatización con IA</p>

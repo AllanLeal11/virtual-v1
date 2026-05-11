@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#1a1a26"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#00b88a"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7b5ea7" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#00e5a0" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <!-- Decorative orb -->
+  <circle cx="540" cy="500" r="380" fill="url(#orb)"/>
+  <circle cx="540" cy="500" r="180" fill="none" stroke="url(#accent)" stroke-width="2" opacity="0.6"/>
+  <circle cx="540" cy="500" r="220" fill="none" stroke="url(#accent)" stroke-width="1" opacity="0.3"/>
+
+  <!-- Brand top -->
+  <text x="540" y="100" font-family="DM Sans, sans-serif" font-size="20" font-weight="500" fill="#00e5a0" letter-spacing="6" text-anchor="middle">VÉRTICE DIGITAL</text>
+
+  <!-- Big 24/7 -->
+  <text x="540" y="430" font-family="Syne, sans-serif" font-size="240" font-weight="800" fill="white" text-anchor="middle">24/7</text>
+
+  <!-- Aria responding -->
+  <text x="540" y="540" font-family="Syne, sans-serif" font-size="36" font-weight="600" fill="#00e5a0" text-anchor="middle" letter-spacing="3">ARIA NUNCA DUERME</text>
+
+  <!-- Languages -->
+  <g font-family="DM Sans, sans-serif" font-size="22" fill="#c0c0d0" text-anchor="middle">
+    <text x="540" y="610">🇪🇸 Español  ·  🇬🇧 English</text>
+  </g>
+
+  <!-- Stats row -->
+  <g transform="translate(0, 720)">
+    <text x="270" y="40" font-family="Syne, sans-serif" font-size="56" font-weight="800" fill="#00e5a0" text-anchor="middle">3 seg</text>
+    <text x="270" y="80" font-family="DM Sans, sans-serif" font-size="20" fill="#6b6b8a" text-anchor="middle">de respuesta</text>
+
+    <text x="540" y="40" font-family="Syne, sans-serif" font-size="56" font-weight="800" fill="#00e5a0" text-anchor="middle">+30%</text>
+    <text x="540" y="80" font-family="DM Sans, sans-serif" font-size="20" fill="#6b6b8a" text-anchor="middle">conversión</text>
+
+    <text x="810" y="40" font-family="Syne, sans-serif" font-size="56" font-weight="800" fill="#00e5a0" text-anchor="middle">$0/mes</text>
+    <text x="810" y="80" font-family="DM Sans, sans-serif" font-size="20" fill="#6b6b8a" text-anchor="middle">sin suscripción</text>
+  </g>
+
+  <!-- Footer CTA -->
+  <text x="540" y="950" font-family="Syne, sans-serif" font-size="28" font-weight="600" fill="white" text-anchor="middle">Mientras dormís, Aria vende.</text>
+  <text x="540" y="1010" font-family="DM Sans, sans-serif" font-size="22" fill="#00e5a0" text-anchor="middle" font-weight="500">→ Demo gratis · verticedigital.space</text>
+</svg>

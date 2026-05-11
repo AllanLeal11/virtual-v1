@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#1a1a26"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gcp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="33%" stop-color="#EA4335"/>
+      <stop offset="66%" stop-color="#FBBC04"/>
+      <stop offset="100%" stop-color="#34A853"/>
+    </linearGradient>
+    <linearGradient id="cta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#00b88a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <!-- Top brand -->
+  <text x="540" y="100" font-family="DM Sans, sans-serif" font-size="20" font-weight="500" fill="#00e5a0" letter-spacing="6" text-anchor="middle">VÉRTICE DIGITAL</text>
+
+  <!-- Big trophy emoji or Google logo -->
+  <text x="540" y="240" font-size="100" text-anchor="middle">🏆</text>
+
+  <!-- Headline -->
+  <text x="540" y="340" font-family="Syne, sans-serif" font-size="62" font-weight="800" fill="white" text-anchor="middle">Ahora somos</text>
+  <text x="540" y="420" font-family="Syne, sans-serif" font-size="62" font-weight="800" fill="url(#gcp)" text-anchor="middle">Google Cloud Certified</text>
+
+  <!-- Stat circle -->
+  <text x="540" y="540" font-family="Syne, sans-serif" font-size="140" font-weight="800" fill="#00e5a0" text-anchor="middle">8</text>
+  <text x="540" y="585" font-family="DM Sans, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="500" letter-spacing="2">CERTIFICACIONES OFICIALES</text>
+
+  <!-- Specializations grid -->
+  <g font-family="DM Sans, sans-serif" font-size="18" fill="#c0c0d0" text-anchor="middle">
+    <text x="270" y="680">☁️ Cloud Computing</text>
+    <text x="810" y="680">🔐 Networking &amp; Security</text>
+    <text x="270" y="720">🏗️ Infrastructure</text>
+    <text x="810" y="720">📊 Data, ML &amp; AI</text>
+    <text x="270" y="760">⚖️ Load Balancing</text>
+    <text x="810" y="760">🛡️ Secure Networks</text>
+    <text x="270" y="800">📱 App Dev Environment</text>
+    <text x="810" y="800">🤖 ML APIs</text>
+  </g>
+
+  <!-- Why it matters -->
+  <text x="540" y="880" font-family="Syne, sans-serif" font-size="26" font-weight="600" fill="white" text-anchor="middle">Tu hotel correría sobre la misma</text>
+  <text x="540" y="918" font-family="Syne, sans-serif" font-size="26" font-weight="600" fill="white" text-anchor="middle">infraestructura que <tspan fill="#00e5a0">Spotify y PayPal</tspan> usan.</text>
+
+  <!-- CTA -->
+  <rect x="280" y="970" width="520" height="60" rx="30" fill="url(#cta)"/>
+  <text x="540" y="1010" font-family="Syne, sans-serif" font-size="22" font-weight="800" fill="#0a0a0f" text-anchor="middle">VER DEMO ARIA · LINK EN BIO</text>
+</svg>

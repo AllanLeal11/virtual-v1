@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#0d3a2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#00b88a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <text x="80" y="120" font-family="DM Sans" font-size="20" font-weight="500" fill="#00e5a0" letter-spacing="6">LA SOLUCIÓN</text>
+
+  <text x="80" y="260" font-family="Syne, sans-serif" font-size="80" font-weight="800" fill="white">Aria.</text>
+  <text x="80" y="340" font-family="Syne, sans-serif" font-size="48" font-weight="600" fill="#00e5a0">Tu concierge IA 24/7</text>
+
+  <line x1="80" y1="400" x2="200" y2="400" stroke="#00e5a0" stroke-width="3"/>
+
+  <!-- Beneficios -->
+  <g font-family="DM Sans, sans-serif" font-size="32" fill="white" font-weight="500">
+    <text x="80" y="490">✓ Responde en español e inglés perfecto</text>
+    <text x="80" y="560">✓ Captura leads al WhatsApp del hotel</text>
+    <text x="80" y="630">✓ Se integra a tu web en 24 horas</text>
+    <text x="80" y="700">✓ Pago único · Sin mensualidades</text>
+  </g>
+
+  <!-- CTA Button -->
+  <rect x="80" y="800" width="920" height="100" rx="50" fill="url(#accent)"/>
+  <text x="540" y="865" font-family="Syne, sans-serif" font-size="38" font-weight="800" fill="#0a0a0f" text-anchor="middle">VER DEMO EN VIVO →</text>
+
+  <text x="540" y="980" font-family="DM Sans, sans-serif" font-size="22" fill="#00e5a0" text-anchor="middle" font-weight="500">verticedigital.space</text>
+  <text x="900" y="1020" font-family="DM Sans, sans-serif" font-size="22" fill="#6b6b8a" text-anchor="end">3 / 3</text>
+</svg>

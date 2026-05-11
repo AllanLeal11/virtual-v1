@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#0d3a2e"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#1a1a26"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="20%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#7b5ea7" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <!-- Big card overlay -->
+  <rect x="60" y="60" width="960" height="960" rx="40" fill="url(#card)"/>
+  <rect x="60" y="60" width="960" height="960" rx="40" fill="url(#glow)"/>
+
+  <!-- Top text -->
+  <text x="540" y="180" font-family="DM Sans, sans-serif" font-size="20" font-weight="500" fill="#00e5a0" letter-spacing="6" text-anchor="middle">DEMO EN VIVO</text>
+
+  <!-- Big headline -->
+  <text x="540" y="340" font-family="Syne, sans-serif" font-size="76" font-weight="800" fill="white" text-anchor="middle">Hablale a Aria</text>
+  <text x="540" y="430" font-family="Syne, sans-serif" font-size="76" font-weight="800" fill="#00e5a0" text-anchor="middle">como un huésped</text>
+
+  <!-- Mock chat bubble -->
+  <rect x="180" y="510" width="720" height="80" rx="40" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)"/>
+  <text x="540" y="558" font-family="DM Sans, sans-serif" font-size="26" fill="white" text-anchor="middle">"¿Cuánto cuesta una habitación frente al mar?"</text>
+
+  <!-- Aria response -->
+  <rect x="180" y="610" width="720" height="160" rx="40" fill="url(#bg)" opacity="0.95"/>
+  <text x="540" y="660" font-family="Syne, sans-serif" font-size="22" font-weight="700" fill="#0a0a0f" text-anchor="middle">⚡ Aria responde en 3 segundos:</text>
+  <text x="540" y="710" font-family="DM Sans, sans-serif" font-size="22" fill="#0a0a0f" text-anchor="middle">"Nuestra Suite Océano cuesta $185/noche</text>
+  <text x="540" y="745" font-family="DM Sans, sans-serif" font-size="22" fill="#0a0a0f" text-anchor="middle">e incluye desayuno. ¿Querés reservar?"</text>
+
+  <!-- CTA -->
+  <text x="540" y="860" font-family="Syne, sans-serif" font-size="32" font-weight="600" fill="white" text-anchor="middle">Probalo ahora ↓</text>
+  <text x="540" y="920" font-family="DM Sans, sans-serif" font-size="38" font-weight="700" fill="#00e5a0" text-anchor="middle">aria-asistente.vercel.app</text>
+
+  <!-- Bottom -->
+  <text x="540" y="985" font-family="DM Sans, sans-serif" font-size="18" fill="#6b6b8a" text-anchor="middle" letter-spacing="3">VÉRTICE DIGITAL · GUANACASTE</text>
+</svg>
