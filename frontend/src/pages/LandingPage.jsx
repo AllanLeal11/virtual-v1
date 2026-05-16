@@ -1,770 +1,451 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const SERVICES = [
-  { key: "Sitios Web", icon: "🌐", name: "Sitios Web", desc: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", priceLabel: "₡150,000 – ₡600,000", min: 150000, max: 600000, features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
-  { key: "Guanacaste Concierge", icon: "🏨", name: "Concierge AI", desc: "Asistente inteligente para hoteles que gestiona reservas y dudas de huéspedes 24/7.", priceLabel: "Suscripción", min: 0, max: null, quote: true, features: ["FastAPI + OpenAI", "Integración Web", "Multilingüe", "Panel de control"] },
-  { key: "WhatsApp Bot", icon: "💬", name: "WhatsApp Bot", desc: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", priceLabel: "₡200,000", min: 200000, max: null, features: ["Respuestas automáticas", "Catálogo de productos", "Atención 24/7", "Integración WhatsApp Business"] },
-  { key: "AirBnB Hub", icon: "🏠", name: "AirBnB Automation", desc: "Automatización total para anfitriones. Gestión de check-ins, guías digitales inteligentes y comunicación automática con huéspedes.", priceLabel: "Consultar", min: 0, max: null, quote: true, features: ["Check-in digital", "Guías interactivas", "Sync con calendarios", "IA Concierge"] },
-  { key: "E-commerce Pro", icon: "🛍️", name: "E-commerce Local", desc: "Lleve sus productos de Guanacaste a todo el mundo. Tiendas online rápidas, seguras y optimizadas para móviles.", priceLabel: "Desde ₡250,000", min: 250000, max: null, features: ["Pagos con tarjeta/SINPE", "Gestión de inventario", "SEO para productos", "Diseño Premium"] },
-  { key: "Sistema POS", icon: "🛒", name: "Sistema POS", desc: "Punto de venta moderno para gestionar tu negocio de forma eficiente.", priceLabel: "₡400,000", min: 400000, max: null, features: ["Inventario", "Ventas", "Reportes", "Multi-sucursal"] },
-  { key: "Automatizaciones", icon: "⚡", name: "Automatizaciones", desc: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", priceLabel: "Cotización", min: 0, max: null, quote: true, features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] },
+  { key: "Sitios Web", icon: "🌐", name: "Sitios Web", desc: "Diseño y desarrollo de páginas web profesionales, responsivas y optimizadas para SEO.", priceLabel: "₡150,000 – ₡600,000", features: ["Diseño personalizado", "Responsive", "SEO optimizado", "Panel admin"] },
+  { key: "Guanacaste Concierge", icon: "🏨", name: "Concierge AI", desc: "Asistente inteligente para hoteles que gestiona reservas y dudas de huéspedes 24/7.", priceLabel: "Suscripción", features: ["FastAPI + OpenAI", "Integración Web", "Multilingüe", "Panel de control"] },
+  { key: "WhatsApp Bot", icon: "💬", name: "WhatsApp Bot", desc: "Automatiza tu atención al cliente con bots inteligentes para WhatsApp Business.", priceLabel: "₡200,000", features: ["Respuestas automáticas", "Catálogo de productos", "Atención 24/7", "Integración WhatsApp Business"] },
+  { key: "AirBnB Hub", icon: "🏠", name: "AirBnB Automation", desc: "Automatización total para anfitriones. Check-ins, guías digitales y comunicación automática.", priceLabel: "Consultar", features: ["Check-in digital", "Guías interactivas", "Sync con calendarios", "IA Concierge"] },
+  { key: "E-commerce Pro", icon: "🛍️", name: "E-commerce Local", desc: "Lleve sus productos de Guanacaste a todo el mundo. Tiendas online rápidas y seguras.", priceLabel: "Desde ₡250,000", features: ["Pagos con tarjeta/SINPE", "Gestión de inventario", "SEO para productos", "Diseño Premium"] },
+  { key: "Sistema POS", icon: "🛒", name: "Sistema POS", desc: "Punto de venta moderno para gestionar tu negocio de forma eficiente.", priceLabel: "₡400,000", features: ["Inventario", "Ventas", "Reportes", "Multi-sucursal"] },
+  { key: "Automatizaciones", icon: "⚡", name: "Automatizaciones", desc: "Optimiza tus procesos con flujos automatizados y conexiones entre sistemas.", priceLabel: "Cotización", features: ["n8n workflows", "Integraciones API", "Notificaciones", "Reportes auto"] },
 ];
 
-// URL pública del producto WhatsApp VIP Business (SaaS independiente).
-const VIP_APP_URL =
-  process.env.REACT_APP_VIP_URL || "https://premium-whats-app--verticedigital1.replit.app";
-
-// URL pública del asistente Aria
+const VIP_APP_URL = process.env.REACT_APP_VIP_URL || "https://premium-whats-app--verticedigital1.replit.app";
 const ARIA_URL = process.env.REACT_APP_ARIA_URL || "https://aria-asistente-84p7.vercel.app";
 
 const VIP_PLANS = [
-  {
-    key: "starter",
-    name: "Básico",
-    price: "$29",
-    period: "/mes",
-    tagline: "Para arrancar y probar el bot oficial.",
-    features: [
-      "1 número WhatsApp Business API",
-      "Hasta 1.000 conversaciones/mes",
-      "Plantillas IA precargadas",
-      "Anti-baneo automático",
-    ],
-    cta: "Empezar Básico",
-  },
-  {
-    key: "pro",
-    name: "Pro",
-    price: "$59",
-    period: "/mes",
-    tagline: "El más elegido por restaurantes y hoteles.",
-    popular: true,
-    features: [
-      "Todo lo del plan Básico",
-      "Hasta 5.000 conversaciones/mes",
-      "Modo Pánico + alertas en vivo",
-      "Simulador de chat y ROI",
-      "Configuración Cero Estrés",
-    ],
-    cta: "Activar Pro",
-  },
-  {
-    key: "premium",
-    name: "Premium",
-    price: "$149",
-    period: "/mes",
-    tagline: "Para operaciones serias y multi-sucursal.",
-    features: [
-      "Todo lo del plan Pro",
-      "Conversaciones ilimitadas",
-      "Multi-sucursal / multi-agente",
-      "Integración n8n + CRM",
-      "Soporte prioritario 24/7",
-    ],
-    cta: "Activar Premium",
-  },
+  { key: "starter", name: "Básico", price: "$29", period: "/mes", tagline: "Para arrancar y probar el bot oficial.", features: ["1 número WhatsApp Business API", "Hasta 1.000 conversaciones/mes", "Plantillas IA precargadas", "Anti-baneo automático"], cta: "Empezar Básico" },
+  { key: "pro", name: "Pro", price: "$59", period: "/mes", tagline: "El más elegido por restaurantes y hoteles.", popular: true, features: ["Todo lo del plan Básico", "Hasta 5.000 conversaciones/mes", "Modo Pánico + alertas en vivo", "Simulador de chat y ROI", "Configuración Cero Estrés"], cta: "Activar Pro" },
+  { key: "premium", name: "Premium", price: "$149", period: "/mes", tagline: "Para operaciones serias y multi-sucursal.", features: ["Todo lo del plan Pro", "Conversaciones ilimitadas", "Multi-sucursal / multi-agente", "Integración n8n + CRM", "Soporte prioritario 24/7"], cta: "Activar Premium" },
 ];
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: rgba(255,255,255,0.07);
-    --accent: #00e5a0;
-    --accent2: #7b5ea7;
-    --text: #f0f0f8;
-    --muted: #6b6b8a;
-    --card-hover: #1e1e2e;
+    --bg: #050811;
+    --bg2: #0a0f1c;
+    --surface: rgba(255,255,255,0.03);
+    --surface-hover: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(0,245,212,0.4);
+    --text: #ffffff;
+    --text-muted: rgba(255,255,255,0.6);
+    --text-dim: rgba(255,255,255,0.4);
+    --accent: #00f5d4;
+    --accent-2: #7c3aed;
+    --accent-3: #f72585;
+    --gradient-1: linear-gradient(135deg, #00f5d4 0%, #00d4ff 50%, #7c3aed 100%);
+    --gradient-2: linear-gradient(135deg, #f72585 0%, #7c3aed 50%, #00f5d4 100%);
+    --gradient-3: linear-gradient(135deg, #facc15 0%, #f72585 50%, #7c3aed 100%);
+    --shadow-soft: 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 60px rgba(0,245,212,0.15);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 400; overflow-x: hidden; }
 
-  .vd-wrap {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
+  /* Mesh gradient background base */
+  .vd-mesh-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 10%, rgba(0,245,212,0.18) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 50% at 85% 30%, rgba(124,58,237,0.22) 0%, transparent 50%),
+      radial-gradient(ellipse 90% 60% at 50% 100%, rgba(247,37,133,0.15) 0%, transparent 50%),
+      linear-gradient(180deg, #050811 0%, #0a0f1c 100%);
+    animation: meshShift 22s ease-in-out infinite;
   }
+  @keyframes meshShift {
+    0%, 100% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(30deg); }
+  }
+  .vd-mesh-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  /* Typography */
+  .vd-h1, .vd-h2, .vd-h3, .vd-h-display { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+  .vd-h-display { font-size: clamp(2.8rem, 7vw, 5.5rem); }
+  .vd-h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); }
+  .vd-h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); }
+  .vd-h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+  .vd-eyebrow { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .vd-body { font-family: 'Inter', sans-serif; }
+  .vd-mono { font-family: 'Space Grotesk', sans-serif; font-variant-numeric: tabular-nums; }
+
+  /* Gradient text */
+  .vd-grad-1 { background: var(--gradient-1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .vd-grad-2 { background: var(--gradient-2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .vd-grad-3 { background: var(--gradient-3); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* Layout */
+  .vd-wrap { position: relative; z-index: 1; }
+  .vd-container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* Custom cursor */
+  .vd-cursor {
+    position: fixed; pointer-events: none; z-index: 9999;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    mix-blend-mode: difference;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .vd-cursor.hovering { width: 48px; height: 48px; background: rgba(0,245,212,0.5); }
+  @media (max-width: 768px) { .vd-cursor { display: none; } }
 
   /* NAV */
   .vd-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.2rem 2.5rem;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1rem 1.5rem;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(5,8,17,0.55);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(14px);
-    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
   }
-  .vd-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.35rem;
-    letter-spacing: -0.02em;
-    color: var(--text);
+  .vd-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text); }
+  .vd-logo-mark {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    background: var(--gradient-1);
+    display: grid; place-items: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #050811;
+    box-shadow: 0 8px 24px rgba(0,245,212,0.35);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .vd-logo span { color: var(--accent); }
+  .vd-logo:hover .vd-logo-mark { transform: rotate(-8deg) scale(1.05); }
+  .vd-logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
   .vd-nav-cta {
-    background: var(--accent);
-    color: #0a0a0f;
+    padding: 0.6rem 1.25rem;
+    background: var(--gradient-1);
+    color: #050811;
     border: none;
-    padding: 0.55rem 1.4rem;
     border-radius: 100px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600; font-size: 0.85rem;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    box-shadow: 0 8px 24px rgba(0,245,212,0.3);
   }
-  .vd-nav-cta:hover { opacity: 0.85; }
+  .vd-nav-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,245,212,0.5); }
 
   /* HERO */
   .vd-hero {
-    padding: 6rem 2.5rem 5rem;
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
     position: relative;
-  }
-  .vd-hero::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 600px; height: 400px;
-    background: radial-gradient(ellipse at center, rgba(0,229,160,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .vd-badge {
-    display: inline-block;
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.25);
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.35rem 1rem;
-    border-radius: 100px;
-    margin-bottom: 1.8rem;
-  }
-  .vd-hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2.4rem, 6vw, 4.2rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin-bottom: 1.4rem;
-  }
-  .vd-hero h1 em {
-    font-style: normal;
-    color: var(--accent);
-  }
-  .vd-hero p {
-    font-size: 1.1rem;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 580px;
-    margin: 0 auto 2.5rem;
-  }
-  .vd-hero-btns {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .vd-btn-primary {
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 100px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.2s;
-  }
-  .vd-btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
-  .vd-btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 0.75rem 2rem;
-    border-radius: 100px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .vd-btn-secondary:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
-
-  /* STATS */
-  .vd-stats {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    padding: 2.5rem 2.5rem 4rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .vd-stat { text-align: center; }
-  .vd-stat-num {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--accent);
-    display: block;
-  }
-  .vd-stat-label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 0.2rem;
-  }
-
-  /* SERVICES */
-  .vd-section {
-    padding: 5rem 2.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  .vd-section-label {
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.8rem;
-  }
-  .vd-section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.8rem;
-  }
-  .vd-section-sub {
-    color: var(--muted);
-    font-size: 1rem;
-    margin-bottom: 3rem;
-    max-width: 500px;
-  }
-
-  .vd-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.2rem;
-  }
-
-  .vd-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.8rem;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
-    position: relative;
+    min-height: 100vh;
+    padding: 8rem 1.5rem 6rem;
+    display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .vd-card:hover {
-    background: var(--card-hover);
-    border-color: rgba(0,229,160,0.2);
-    transform: translateY(-2px);
+  .vd-hero-orb {
+    position: absolute; z-index: 0;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: var(--gradient-1);
+    filter: blur(140px); opacity: 0.35;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbFloat 10s ease-in-out infinite;
   }
-  .vd-card.selected {
-    border-color: var(--accent);
-    background: rgba(0,229,160,0.05);
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -55%) scale(1.08); }
   }
-  .vd-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-  }
-  .vd-card-icon {
-    font-size: 2rem;
-    line-height: 1;
-  }
-  .vd-card-price {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--accent);
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.2);
-    padding: 0.25rem 0.7rem;
+  .vd-hero-inner { position: relative; z-index: 2; max-width: 1100px; text-align: center; }
+  .vd-hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 1rem;
     border-radius: 100px;
-    white-space: nowrap;
-  }
-  .vd-card h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-  .vd-card p {
-    font-size: 0.88rem;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 1.2rem;
-  }
-  .vd-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-  .vd-feature-tag {
-    font-size: 0.75rem;
-    color: rgba(240,240,248,0.6);
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
-    padding: 0.2rem 0.6rem;
-    border-radius: 100px;
-  }
-  .vd-check {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 22px;
-    height: 22px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    color: #0a0a0f;
-    font-weight: 700;
-  }
-
-  /* CONTACT FORM */
-  .vd-form-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2.5rem;
-    max-width: 680px;
-    margin: 0 auto;
-  }
-  .vd-form-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 0.4rem;
-  }
-  .vd-form-sub {
-    color: var(--muted);
-    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 500;
+    color: var(--text-muted);
     margin-bottom: 2rem;
   }
-  .vd-selected-services {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+  .vd-hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
   }
-  .vd-selected-tag {
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.3);
-    color: var(--accent);
-    font-size: 0.8rem;
-    padding: 0.3rem 0.8rem;
+  .vd-hero-sub { font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--text-muted); max-width: 720px; margin: 1.5rem auto 0; line-height: 1.6; }
+  .vd-hero-actions { margin-top: 3rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+  /* Buttons */
+  .vd-btn {
+    position: relative;
+    padding: 1rem 2rem;
     border-radius: 100px;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .vd-selected-tag button {
-    background: none;
     border: none;
-    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600; font-size: 0.95rem;
     cursor: pointer;
-    font-size: 0.9rem;
-    line-height: 1;
-    padding: 0;
-    opacity: 0.6;
-  }
-  .vd-selected-tag button:hover { opacity: 1; }
-  .vd-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  @media (max-width: 560px) {
-    .vd-form-row { grid-template-columns: 1fr; }
-  }
-  .vd-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  .vd-field label {
-    font-size: 0.82rem;
-    color: var(--muted);
-    font-weight: 500;
-  }
-  .vd-field input,
-  .vd-field textarea,
-  .vd-field select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.7rem 1rem;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  .vd-field input:focus,
-  .vd-field textarea:focus,
-  .vd-field select:focus {
-    border-color: rgba(0,229,160,0.4);
-  }
-  .vd-field textarea { resize: vertical; min-height: 100px; }
-  .vd-field select option { background: var(--surface2); }
-  .vd-submit {
-    width: 100%;
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    padding: 0.85rem;
-    border-radius: 12px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 1rem;
-    transition: opacity 0.2s, transform 0.2s;
-  }
-  .vd-submit:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
-  .vd-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* FOOTER */
-  .vd-footer {
-    border-top: 1px solid var(--border);
-    padding: 2.5rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-  .vd-footer strong { color: var(--text); font-family: 'Syne', sans-serif; }
-
-  /* GOOGLE CLOUD CERTIFIED BADGE */
-  .vd-cert-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 22px;
-    background: linear-gradient(135deg, rgba(0,229,160,0.08), rgba(123,94,167,0.08));
-    border: 1px solid rgba(0,229,160,0.3);
-    border-radius: 50px;
     text-decoration: none;
-    margin-bottom: 1rem;
-    transition: all 0.25s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    overflow: hidden;
+  }
+  .vd-btn-primary {
+    background: var(--gradient-1);
+    color: #050811;
+    box-shadow: 0 10px 30px rgba(0,245,212,0.35);
+  }
+  .vd-btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 40px rgba(0,245,212,0.55); }
+  .vd-btn-ghost {
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+  .vd-btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); transform: translateY(-3px); }
+  .vd-btn-arrow { transition: transform 0.3s; display: inline-block; }
+  .vd-btn:hover .vd-btn-arrow { transform: translateX(4px); }
+
+  /* HERO stats */
+  .vd-hero-stats {
+    margin-top: 5rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2rem;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .vd-stat { text-align: center; }
+  .vd-stat-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(2.2rem, 4vw, 3.2rem); letter-spacing: -0.02em; }
+  .vd-stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; }
+
+  /* SECTION */
+  .vd-section { padding: 7rem 1.5rem; position: relative; }
+  .vd-section-head { max-width: 800px; margin: 0 auto 4rem; text-align: center; }
+  .vd-section-head .vd-eyebrow { display: inline-block; margin-bottom: 1rem; }
+  .vd-section-head .vd-h1 { margin: 0; }
+  .vd-section-head p { color: var(--text-muted); font-size: 1.1rem; margin-top: 1rem; line-height: 1.6; }
+
+  /* Cards grid */
+  .vd-grid {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    max-width: 1280px; margin: 0 auto;
+  }
+  .vd-card {
+    position: relative;
+    padding: 2rem;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, background 0.3s;
+    overflow: hidden;
     cursor: pointer;
   }
-  .vd-cert-badge:hover {
-    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(123,94,167,0.15));
-    border-color: #00e5a0;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0,229,160,0.15);
-  }
-  .vd-cert-icon { font-size: 28px; }
-  .vd-cert-text { display: flex; flex-direction: column; text-align: left; }
-  .vd-cert-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--text);
-    letter-spacing: 0.3px;
-  }
-  .vd-cert-sub {
-    font-size: 0.72rem;
-    color: var(--accent);
-    margin-top: 2px;
-    letter-spacing: 0.5px;
-  }
-
-  /* WHATSAPP VIP SECTION */
-  .vd-vip {
-    padding: 5rem 2.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-  }
-  .vd-vip::before {
-    content: '';
-    position: absolute;
-    top: 10%; left: 50%;
-    transform: translateX(-50%);
-    width: 800px; height: 500px;
-    background: radial-gradient(ellipse at center, rgba(0,229,160,0.06) 0%, transparent 70%);
+  .vd-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(600px circle at var(--mx, 0px) var(--my, 0px), rgba(0,245,212,0.08), transparent 40%);
+    opacity: 0; transition: opacity 0.3s;
     pointer-events: none;
-    z-index: 0;
   }
-  .vd-vip-head {
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    margin-bottom: 3rem;
-  }
-  .vd-vip-eyebrow {
-    display: inline-block;
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.3);
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0.4rem 1.1rem;
-    border-radius: 100px;
-    margin-bottom: 1.4rem;
-  }
-  .vd-vip-title {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.4rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+  .vd-card:hover { transform: translateY(-6px); border-color: var(--border-hover); background: rgba(255,255,255,0.04); }
+  .vd-card:hover::before { opacity: 1; }
+  .vd-card.selected { border-color: var(--accent); background: rgba(0,245,212,0.06); }
+  .vd-card-icon { font-size: 2.2rem; display: inline-block; margin-bottom: 1rem; }
+  .vd-card h3 { margin: 0 0 0.6rem; font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 600; }
+  .vd-card-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.55; margin-bottom: 1.2rem; }
+  .vd-card-price {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    color: var(--accent); font-size: 0.9rem;
     margin-bottom: 1rem;
   }
-  .vd-vip-title em {
-    font-style: normal;
-    color: var(--accent);
+  .vd-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .vd-features li {
+    font-size: 0.85rem; color: var(--text-muted);
+    display: flex; align-items: center; gap: 0.5rem;
   }
-  .vd-vip-sub {
-    color: var(--muted);
-    font-size: 1.05rem;
-    line-height: 1.7;
-    max-width: 620px;
-    margin: 0 auto 1.8rem;
+  .vd-features li::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
   }
-  .vd-vip-pills {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-  .vd-vip-pill {
-    background: var(--surface);
+
+  /* ARIA section */
+  .vd-aria-section {
+    margin: 4rem auto; max-width: 1280px;
+    padding: 4rem 2.5rem;
+    border-radius: 32px;
+    background:
+      radial-gradient(ellipse at top right, rgba(124,58,237,0.18), transparent 60%),
+      radial-gradient(ellipse at bottom left, rgba(0,245,212,0.15), transparent 60%),
+      rgba(255,255,255,0.02);
     border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 0.82rem;
-    font-weight: 500;
-    padding: 0.4rem 0.9rem;
-    border-radius: 100px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
   }
-  .vd-vip-pill em {
-    color: var(--accent);
-    font-style: normal;
-    margin-right: 0.35rem;
-  }
-  .vd-vip-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.2rem;
+  .vd-aria-section h2 { margin: 0.5rem 0 1rem; }
+  .vd-aria-section p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; }
+  .vd-aria-frame-wrap {
     position: relative;
-    z-index: 1;
-    margin-bottom: 2.5rem;
+    aspect-ratio: 9 / 14;
+    border-radius: 24px; overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft), 0 0 80px rgba(0,245,212,0.15);
   }
+  .vd-aria-frame-wrap iframe { width: 100%; height: 100%; border: 0; }
+  @media (max-width: 900px) {
+    .vd-aria-section { grid-template-columns: 1fr; padding: 2.5rem 1.5rem; }
+    .vd-aria-frame-wrap { aspect-ratio: 9/12; max-width: 360px; margin: 0 auto; }
+  }
+
+  /* VIP plans */
+  .vd-vip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
   .vd-vip-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 2rem 1.8rem;
-    display: flex;
-    flex-direction: column;
-    transition: background 0.2s, border-color 0.2s, transform 0.2s;
     position: relative;
+    padding: 2.5rem 2rem;
+    border-radius: 28px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+    backdrop-filter: blur(20px);
   }
-  .vd-vip-card:hover {
-    background: var(--card-hover);
-    border-color: rgba(0,229,160,0.25);
-    transform: translateY(-3px);
-  }
+  .vd-vip-card:hover { transform: translateY(-8px); border-color: var(--border-hover); }
   .vd-vip-card.popular {
-    border-color: rgba(0,229,160,0.5);
-    background: linear-gradient(180deg, rgba(0,229,160,0.05) 0%, var(--surface) 60%);
+    background: linear-gradient(180deg, rgba(0,245,212,0.08), rgba(124,58,237,0.06));
+    border-color: var(--accent);
+    box-shadow: 0 20px 50px rgba(0,245,212,0.2);
   }
   .vd-vip-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
+    position: absolute; top: -12px; left: 50%;
     transform: translateX(-50%);
-    background: var(--accent);
-    color: #0a0a0f;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.3rem 0.9rem;
+    background: var(--gradient-1);
+    color: #050811;
+    padding: 0.3rem 1rem;
     border-radius: 100px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600; font-size: 0.72rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
   }
-  .vd-vip-plan-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
-  .vd-vip-plan-tag {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 1.4rem;
-    line-height: 1.5;
-  }
-  .vd-vip-price-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.3rem;
-    margin-bottom: 1.6rem;
-  }
-  .vd-vip-price {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.6rem;
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .vd-vip-period {
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-  .vd-vip-feats {
-    list-style: none;
-    margin: 0 0 1.8rem 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    flex: 1;
-  }
-  .vd-vip-feats li {
-    color: var(--text);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.55rem;
-  }
-  .vd-vip-feats li::before {
-    content: '✓';
-    color: var(--accent);
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .vd-vip-card-cta {
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    padding: 0.8rem 1.4rem;
-    border-radius: 100px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    transition: opacity 0.2s, transform 0.2s;
-  }
-  .vd-vip-card-cta:hover { opacity: 0.85; transform: translateY(-1px); }
-  .vd-vip-card-cta.outline {
-    background: transparent;
-    color: var(--text);
+  .vd-vip-price { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 2.8rem; letter-spacing: -0.03em; }
+  .vd-vip-period { font-size: 1rem; color: var(--text-muted); }
+  .vd-vip-tagline { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5; }
+  .vd-vip-features { margin: 2rem 0; }
+
+  /* Form */
+  .vd-form {
+    max-width: 700px; margin: 0 auto;
+    padding: 2.5rem;
+    border-radius: 28px;
+    background: rgba(255,255,255,0.025);
     border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
   }
-  .vd-vip-card-cta.outline:hover {
-    border-color: rgba(0,229,160,0.4);
+  .vd-form-grid { display: grid; gap: 1rem; }
+  .vd-form-row { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .vd-form-row { grid-template-columns: 1fr; } }
+  .vd-input, .vd-textarea, .vd-select {
+    width: 100%;
+    padding: 0.95rem 1.1rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
   }
-  .vd-vip-foot {
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.8rem;
+  .vd-input:focus, .vd-textarea:focus, .vd-select:focus {
+    border-color: var(--accent);
+    background: rgba(0,245,212,0.04);
+  }
+  .vd-textarea { min-height: 130px; resize: vertical; font-family: 'Inter', sans-serif; }
+  .vd-label { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; display: block; }
+
+  /* Marquee */
+  .vd-marquee {
+    overflow: hidden; padding: 3rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+    margin: 4rem 0 0;
+  }
+  .vd-marquee-track {
+    display: flex; gap: 4rem; white-space: nowrap;
+    animation: marquee 30s linear infinite;
+  }
+  .vd-marquee-item {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem; font-weight: 700;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .vd-marquee-item::before { content: '◆'; color: var(--accent); font-size: 0.6em; }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
   }
 
-  /* ARIA WIDGET */
+  /* Footer */
+  .vd-footer {
+    padding: 4rem 1.5rem 3rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-dim); font-size: 0.85rem;
+  }
+  .vd-footer-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .vd-footer-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .vd-footer-links a:hover { color: var(--accent); }
+
+  /* Aria FAB */
   .vd-aria-fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 64px;
-    height: 64px;
+    position: fixed; bottom: 24px; right: 24px;
+    width: 64px; height: 64px;
     border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, #00e5a0, #7b5ea7);
-    color: #0a0a0f;
-    font-size: 26px;
+    border: 1px solid rgba(0,245,212,0.4);
+    background: var(--gradient-1);
+    color: #050811; font-size: 26px;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,229,160,0.35), 0 0 0 1px rgba(0,229,160,0.2);
+    box-shadow: 0 10px 40px rgba(0,245,212,0.5);
     z-index: 9999;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .vd-aria-fab:hover {
-    transform: scale(1.06);
-    box-shadow: 0 14px 40px rgba(0,229,160,0.5);
-  }
-  .vd-aria-fab.open {
-    background: linear-gradient(135deg, #1a1a26, #12121a);
-    color: var(--text);
-  }
-  .vd-aria-frame {
-    position: fixed;
-    bottom: 100px;
-    right: 24px;
-    width: 380px;
-    height: 580px;
-    max-width: calc(100vw - 32px);
-    max-height: calc(100vh - 130px);
-    border: none;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,160,0.15);
+  .vd-aria-fab:hover { transform: scale(1.1) rotate(-5deg); }
+  .vd-aria-frame-popup {
+    position: fixed; bottom: 100px; right: 24px;
+    width: 380px; height: 580px;
+    max-width: calc(100vw - 32px); max-height: calc(100vh - 130px);
+    border: 1px solid var(--border); border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,245,212,0.2);
     z-index: 9998;
-    background: #0a0a0f;
-    animation: ariaSlide 0.25s ease;
+    background: #050811;
+    animation: ariaSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes ariaSlide {
-    from { opacity: 0; transform: translateY(20px) scale(0.96); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* SCROLL REVEAL */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .vd-card { animation: fadeUp 0.4s ease both; }
-  .vd-vip-card { animation: fadeUp 0.5s ease both; }
-  ${SERVICES.map((_, i) => `.vd-card:nth-child(${i + 1}) { animation-delay: ${i * 0.05}s; }`).join('\n  ')}
+  /* Reveal animations */
+  .vd-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+  .vd-reveal.in-view { opacity: 1; transform: translateY(0); }
 
-  @media (max-width: 640px) {
-    .vd-nav { padding: 1rem 1.2rem; }
-    .vd-hero { padding: 4rem 1.2rem 3rem; }
-    .vd-section { padding: 3rem 1.2rem; }
-    .vd-stats { gap: 2rem; padding: 2rem 1.2rem; }
-    .vd-form-wrap { padding: 1.5rem; }
+  /* Selected pill */
+  .vd-selected-pills {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;
+  }
+  .vd-pill {
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+    background: rgba(0,245,212,0.1);
+    border: 1px solid rgba(0,245,212,0.3);
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.78rem;
   }
 `;
 
@@ -772,8 +453,76 @@ const LandingPage = () => {
   const [selected, setSelected] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "", budget: "", message: "" });
   const [loading, setLoading] = useState(false);
-  const [formVisible, setFormVisible] = useState(false);
   const [ariaOpen, setAriaOpen] = useState(false);
+  const cursorRef = useRef(null);
+
+  // Custom cursor
+  useEffect(() => {
+    const onMove = (e) => {
+      if (cursorRef.current) {
+        cursorRef.current.style.left = e.clientX + "px";
+        cursorRef.current.style.top = e.clientY + "px";
+      }
+    };
+    const onEnter = () => cursorRef.current?.classList.add("hovering");
+    const onLeave = () => cursorRef.current?.classList.remove("hovering");
+    window.addEventListener("mousemove", onMove);
+    document.querySelectorAll("a, button, .vd-card").forEach((el) => {
+      el.addEventListener("mouseenter", onEnter);
+      el.addEventListener("mouseleave", onLeave);
+    });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // Scroll reveal with IntersectionObserver (GSAP-style without dependency)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in-view")),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".vd-reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  // Card mouse tracking for spotlight effect
+  useEffect(() => {
+    const cards = document.querySelectorAll(".vd-card, .vd-vip-card");
+    const onMove = (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+    };
+    cards.forEach((c) => c.addEventListener("mousemove", onMove));
+    return () => cards.forEach((c) => c.removeEventListener("mousemove", onMove));
+  }, []);
+
+  // Vanta.js globe in hero (loaded via CDN scripts in index.html)
+  useEffect(() => {
+    let effect;
+    const interval = setInterval(() => {
+      if (window.VANTA && window.VANTA.GLOBE && document.getElementById("vd-vanta-globe")) {
+        effect = window.VANTA.GLOBE({
+          el: "#vd-vanta-globe",
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.0,
+          minWidth: 200.0,
+          scale: 1.0,
+          scaleMobile: 1.0,
+          color: 0x00f5d4,
+          color2: 0x7c3aed,
+          size: 1.0,
+          backgroundColor: 0x050811,
+        });
+        clearInterval(interval);
+      }
+    }, 200);
+    return () => {
+      clearInterval(interval);
+      if (effect) effect.destroy();
+    };
+  }, []);
 
   const toggleService = (key) => {
     setSelected((prev) =>
@@ -781,15 +530,10 @@ const LandingPage = () => {
     );
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const scrollToForm = () => {
-    setFormVisible(true);
-    setTimeout(() => {
-      document.getElementById("vd-contact")?.scrollIntoView({ behavior: "smooth" });
-    }, 50);
+    document.getElementById("vd-contact")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSubmit = async (e) => {
@@ -800,10 +544,7 @@ const LandingPage = () => {
     }
     setLoading(true);
     try {
-      await axios.post(`${API}/contact`, {
-        ...form,
-        services: selected,
-      });
+      await axios.post(`${API}/contact`, { ...form, services: selected });
       toast.success("¡Mensaje enviado! Te contactaremos pronto.");
       setForm({ name: "", email: "", phone: "", budget: "", message: "" });
       setSelected([]);
@@ -817,300 +558,255 @@ const LandingPage = () => {
   return (
     <>
       <style>{styles}</style>
-      <div className="vd-wrap">
+      <div className="vd-mesh-bg" />
+      <div ref={cursorRef} className="vd-cursor" />
 
+      <div className="vd-wrap">
         {/* NAV */}
         <nav className="vd-nav">
-          <div className="vd-logo">Vertice<span>.</span>Digital</div>
-          <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-            <button
-              className="vd-btn-secondary"
-              style={{ padding: "0.5rem 1.1rem", fontSize: "0.85rem" }}
-              onClick={() => document.getElementById("vd-whatsapp-vip")?.scrollIntoView({ behavior: "smooth" })}
-              data-testid="nav-vip"
-            >
-              WhatsApp VIP
-            </button>
-            <button className="vd-nav-cta" onClick={scrollToForm}>Cotizar proyecto</button>
-          </div>
+          <a href="#top" className="vd-logo">
+            <span className="vd-logo-mark">V</span>
+            <span className="vd-logo-text">Vértice Digital</span>
+          </a>
+          <button className="vd-nav-cta" onClick={scrollToForm}>Cotizar →</button>
         </nav>
 
         {/* HERO */}
-        <section className="vd-hero">
-          <div className="vd-badge">🇨🇷 Guanacaste · Costa Rica</div>
-          <h1>
-            Tecnología que hace<br />
-            crecer tu <em>negocio</em>
-          </h1>
-          <p>
-            Desarrollo web, automatizaciones con IA y soluciones digitales a medida
-            para empresas en Guanacaste y toda Costa Rica.
-          </p>
-          <div className="vd-hero-btns">
-            <button className="vd-btn-primary" onClick={scrollToForm}>Ver servicios y cotizar</button>
-            <button className="vd-btn-secondary" onClick={() => document.getElementById("vd-services")?.scrollIntoView({ behavior: "smooth" })}>
-              Conocer más
-            </button>
-          </div>
-        </section>
-
-        {/* STATS */}
-        <div className="vd-stats">
-          {[
-            { num: "50+", label: "Proyectos entregados" },
-            { num: "7", label: "Servicios disponibles" },
-            { num: "24/7", label: "Soporte con IA" },
-            { num: "100%", label: "Clientes satisfechos" },
-          ].map((s) => (
-            <div key={s.num} className="vd-stat">
-              <span className="vd-stat-num">{s.num}</span>
-              <div className="vd-stat-label">{s.label}</div>
+        <section className="vd-hero" id="top">
+          <div id="vd-vanta-globe" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0.45 }} />
+          <div className="vd-hero-orb" />
+          <div className="vd-hero-inner vd-reveal">
+            <div className="vd-hero-badge">
+              <span className="vd-hero-badge-dot" />
+              Tecnología con IA · Liberia, Guanacaste
             </div>
-          ))}
-        </div>
-
-        {/* WHATSAPP VIP BUSINESS — sección destacada */}
-        <section className="vd-vip" id="vd-whatsapp-vip">
-          <div className="vd-vip-head">
-            <div className="vd-vip-eyebrow">⭐ Producto Premium · IA</div>
-            <h2 className="vd-vip-title">
-              WhatsApp <em>VIP Business</em>
-            </h2>
-            <p className="vd-vip-sub">
-              El asistente oficial de WhatsApp con IA que vende, agenda y atiende
-              por ti — sin baneos, sin estrés, en español. Activación guiada,
-              modo pánico y simulador de conversaciones incluidos.
+            <h1 className="vd-h-display">
+              Construimos el <span className="vd-grad-1">futuro digital</span> de tu negocio.
+            </h1>
+            <p className="vd-hero-sub">
+              Asistentes virtuales con IA, sitios web premium, bots de WhatsApp y automatizaciones para empresas que quieren dejar atrás el papel y abrazar la inteligencia.
             </p>
-            <div className="vd-vip-pills">
-              <div className="vd-vip-pill"><em>✓</em>Anti-baneo oficial</div>
-              <div className="vd-vip-pill"><em>✓</em>IA 24/7 en español</div>
-              <div className="vd-vip-pill"><em>✓</em>Setup Cero Estrés</div>
-              <div className="vd-vip-pill"><em>✓</em>Modo Pánico</div>
+            <div className="vd-hero-actions">
+              <button className="vd-btn vd-btn-primary" onClick={scrollToForm}>
+                Empezar proyecto <span className="vd-btn-arrow">→</span>
+              </button>
+              <a className="vd-btn vd-btn-ghost" href={ARIA_URL} target="_blank" rel="noopener noreferrer">
+                Ver demo Aria
+              </a>
             </div>
-          </div>
 
-          <div className="vd-vip-grid">
-            {VIP_PLANS.map((plan) => (
-              <div
-                key={plan.key}
-                className={`vd-vip-card${plan.popular ? " popular" : ""}`}
-                data-testid={`vip-plan-${plan.key}`}
-              >
-                {plan.popular && <div className="vd-vip-badge">Más popular</div>}
-                <div className="vd-vip-plan-name">{plan.name}</div>
-                <div className="vd-vip-plan-tag">{plan.tagline}</div>
-                <div className="vd-vip-price-row">
-                  <span className="vd-vip-price">{plan.price}</span>
-                  <span className="vd-vip-period">{plan.period}</span>
-                </div>
-                <ul className="vd-vip-feats">
-                  {plan.features.map((f) => (
-                    <li key={f}>{f}</li>
-                  ))}
-                </ul>
-                <a
-                  className="vd-vip-card-cta"
-                  href={`/vip/checkout?plan=${plan.key}`}
-                  data-testid={`vip-cta-${plan.key}`}
-                >
-                  {plan.cta} →
-                </a>
+            <div className="vd-hero-stats">
+              <div className="vd-stat">
+                <div className="vd-stat-num vd-grad-1">8+</div>
+                <div className="vd-stat-label">Google Cloud Certs</div>
               </div>
-            ))}
-          </div>
-
-          <div className="vd-vip-foot">
-            <a
-              className="vd-vip-card-cta"
-              href="/vip/checkout?plan=pro"
-              data-testid="vip-cta-demo"
-            >
-              Activar ahora →
-            </a>
-            <a
-              className="vd-vip-card-cta outline"
-              href="https://wa.me/50687518055?text=Hola!%20Quiero%20ver%20una%20demo%20de%20WhatsApp%20VIP"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="vip-cta-simulator"
-            >
-              💬 Pedir demo por WhatsApp
-            </a>
+              <div className="vd-stat">
+                <div className="vd-stat-num vd-grad-2">24/7</div>
+                <div className="vd-stat-label">Asistencia IA</div>
+              </div>
+              <div className="vd-stat">
+                <div className="vd-stat-num vd-grad-3">100%</div>
+                <div className="vd-stat-label">Made in Costa Rica</div>
+              </div>
+              <div className="vd-stat">
+                <div className="vd-stat-num vd-grad-1">∞</div>
+                <div className="vd-stat-label">Posibilidades</div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* SERVICES */}
         <section className="vd-section" id="vd-services">
-          <div className="vd-section-label">Servicios</div>
-          <h2 className="vd-section-title">¿Qué necesita tu negocio?</h2>
-          <p className="vd-section-sub">
-            Selecciona uno o más servicios para armar tu cotización personalizada.
-          </p>
+          <div className="vd-section-head vd-reveal">
+            <span className="vd-eyebrow">Servicios</span>
+            <h2 className="vd-h1">
+              Soluciones <span className="vd-grad-2">a tu medida</span>
+            </h2>
+            <p>
+              Cada negocio es único. Por eso construimos cada solución desde cero, optimizada para tu mercado y tus clientes.
+            </p>
+          </div>
 
-          <div className="vd-grid">
-            {SERVICES.map((svc) => (
+          <div className="vd-grid vd-reveal">
+            {SERVICES.map((s) => (
               <div
-                key={svc.key}
-                className={`vd-card${selected.includes(svc.key) ? " selected" : ""}`}
-                onClick={() => toggleService(svc.key)}
+                key={s.key}
+                className={`vd-card ${selected.includes(s.key) ? "selected" : ""}`}
+                onClick={() => toggleService(s.key)}
               >
-                {selected.includes(svc.key) && <div className="vd-check">✓</div>}
-                <div className="vd-card-top">
-                  <div className="vd-card-icon">{svc.icon}</div>
-                  <div className="vd-card-price">{svc.priceLabel}</div>
-                </div>
-                <h3>{svc.name}</h3>
-                <p>{svc.desc}</p>
-                <div className="vd-features">
-                  {svc.features.map((f) => (
-                    <span key={f} className="vd-feature-tag">{f}</span>
-                  ))}
-                </div>
+                <span className="vd-card-icon">{s.icon}</span>
+                <h3>{s.name}</h3>
+                <div className="vd-card-price">{s.priceLabel}</div>
+                <p className="vd-card-desc">{s.desc}</p>
+                <ul className="vd-features">
+                  {s.features.map((f) => <li key={f}>{f}</li>)}
+                </ul>
               </div>
             ))}
           </div>
+        </section>
 
-          {selected.length > 0 && (
-            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-              <button className="vd-btn-primary" onClick={scrollToForm}>
-                Cotizar {selected.length} servicio{selected.length > 1 ? "s" : ""} seleccionado{selected.length > 1 ? "s" : ""} →
-              </button>
+        {/* ARIA SHOWCASE */}
+        <section className="vd-section">
+          <div className="vd-aria-section vd-reveal">
+            <div>
+              <span className="vd-eyebrow">Producto estrella</span>
+              <h2 className="vd-h1">
+                Conocé a <span className="vd-grad-1">Aria</span>
+              </h2>
+              <p style={{ marginBottom: "1.5rem" }}>
+                Una asistente virtual con voz neural costarricense, capaz de atender huéspedes, capturar reservas y resolver dudas <strong style={{ color: "var(--accent)" }}>24/7 en español e inglés</strong>.
+              </p>
+              <p style={{ marginBottom: "2rem" }}>
+                Probala ahora mismo. Si te gusta, en 48 horas la implementamos en tu negocio personalizada con tu marca.
+              </p>
+              <a className="vd-btn vd-btn-primary" href={ARIA_URL} target="_blank" rel="noopener noreferrer">
+                Probar Aria gratis <span className="vd-btn-arrow">→</span>
+              </a>
             </div>
-          )}
+            <div className="vd-aria-frame-wrap">
+              <iframe src={ARIA_URL} title="Aria Demo" loading="lazy" />
+            </div>
+          </div>
+        </section>
+
+        {/* VIP PLANS */}
+        <section className="vd-section" id="vd-vip">
+          <div className="vd-section-head vd-reveal">
+            <span className="vd-eyebrow">WhatsApp VIP Business</span>
+            <h2 className="vd-h1">
+              Planes <span className="vd-grad-3">SaaS</span>
+            </h2>
+            <p>
+              Bots oficiales de WhatsApp con IA. Sin código. Sin baneos. Sin sorpresas.
+            </p>
+          </div>
+
+          <div className="vd-vip-grid vd-reveal">
+            {VIP_PLANS.map((p) => (
+              <div key={p.key} className={`vd-vip-card ${p.popular ? "popular" : ""}`}>
+                {p.popular && <div className="vd-vip-badge">Más popular</div>}
+                <h3 className="vd-h3" style={{ fontFamily: 'Space Grotesk', fontWeight: 600, margin: 0 }}>{p.name}</h3>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", margin: "1rem 0 0.5rem" }}>
+                  <span className="vd-vip-price">{p.price}</span>
+                  <span className="vd-vip-period">{p.period}</span>
+                </div>
+                <p className="vd-vip-tagline">{p.tagline}</p>
+                <ul className="vd-features vd-vip-features">
+                  {p.features.map((f) => <li key={f}>{f}</li>)}
+                </ul>
+                <a className={`vd-btn ${p.popular ? "vd-btn-primary" : "vd-btn-ghost"}`} href={VIP_APP_URL} target="_blank" rel="noopener noreferrer" style={{ width: "100%", justifyContent: "center" }}>
+                  {p.cta} <span className="vd-btn-arrow">→</span>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* MARQUEE */}
+        <section className="vd-marquee">
+          <div className="vd-marquee-track">
+            <div className="vd-marquee-item">Inteligencia Artificial</div>
+            <div className="vd-marquee-item">Desarrollo Web</div>
+            <div className="vd-marquee-item">WhatsApp Business</div>
+            <div className="vd-marquee-item">Automatización</div>
+            <div className="vd-marquee-item">Google Cloud</div>
+            <div className="vd-marquee-item">SEO</div>
+            <div className="vd-marquee-item">Inteligencia Artificial</div>
+            <div className="vd-marquee-item">Desarrollo Web</div>
+            <div className="vd-marquee-item">WhatsApp Business</div>
+            <div className="vd-marquee-item">Automatización</div>
+            <div className="vd-marquee-item">Google Cloud</div>
+            <div className="vd-marquee-item">SEO</div>
+          </div>
         </section>
 
         {/* CONTACT FORM */}
         <section className="vd-section" id="vd-contact">
-          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <div className="vd-section-label">Contacto</div>
-            <h2 className="vd-section-title">Hablemos de tu proyecto</h2>
+          <div className="vd-section-head vd-reveal">
+            <span className="vd-eyebrow">Contáctanos</span>
+            <h2 className="vd-h1">
+              Hablemos de <span className="vd-grad-1">tu proyecto</span>
+            </h2>
+            <p>
+              Cotización gratuita en menos de 24 horas. Pago único, sin mensualidades ocultas.
+            </p>
           </div>
 
-          <div className="vd-form-wrap">
-            <div className="vd-form-title">Solicitar cotización</div>
-            <div className="vd-form-sub">Te respondemos en menos de 24 horas.</div>
-
+          <form className="vd-form vd-reveal" onSubmit={handleSubmit}>
             {selected.length > 0 && (
-              <div className="vd-selected-services">
-                {selected.map((key) => {
-                  const svc = SERVICES.find((s) => s.key === key);
-                  return (
-                    <div key={key} className="vd-selected-tag">
-                      {svc?.icon} {svc?.name}
-                      <button onClick={() => toggleService(key)}>×</button>
-                    </div>
-                  );
-                })}
+              <div>
+                <div className="vd-label">Servicios seleccionados:</div>
+                <div className="vd-selected-pills">
+                  {selected.map((s) => <span key={s} className="vd-pill">{s}</span>)}
+                </div>
               </div>
             )}
-
-            <form onSubmit={handleSubmit}>
+            <div className="vd-form-grid">
               <div className="vd-form-row">
-                <div className="vd-field">
-                  <label>Nombre *</label>
-                  <input
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="Tu nombre"
-                    required
-                  />
+                <div>
+                  <label className="vd-label">Nombre completo</label>
+                  <input className="vd-input" name="name" value={form.name} onChange={handleChange} placeholder="Tu nombre" />
                 </div>
-                <div className="vd-field">
-                  <label>Correo *</label>
-                  <input
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="tu@correo.com"
-                    required
-                  />
+                <div>
+                  <label className="vd-label">Correo</label>
+                  <input className="vd-input" name="email" type="email" value={form.email} onChange={handleChange} placeholder="tu@correo.com" />
                 </div>
               </div>
-
               <div className="vd-form-row">
-                <div className="vd-field">
-                  <label>Teléfono / WhatsApp</label>
-                  <input
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="+506 8888-8888"
-                  />
+                <div>
+                  <label className="vd-label">WhatsApp (opcional)</label>
+                  <input className="vd-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+506 8888-8888" />
                 </div>
-                <div className="vd-field">
-                  <label>Servicio de interés</label>
-                  <select
-                    name="budget"
-                    value={form.budget}
-                    onChange={handleChange}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {SERVICES.map((s) => (
-                      <option key={s.key} value={s.key}>{s.icon} {s.name}</option>
-                    ))}
+                <div>
+                  <label className="vd-label">Presupuesto aproximado</label>
+                  <select className="vd-select" name="budget" value={form.budget} onChange={handleChange}>
+                    <option value="">Selecciona...</option>
+                    <option value="0-200k">Menos de ₡200.000</option>
+                    <option value="200-500k">₡200.000 - ₡500.000</option>
+                    <option value="500k-1M">₡500.000 - ₡1.000.000</option>
+                    <option value="1M+">Más de ₡1.000.000</option>
                   </select>
                 </div>
               </div>
-
-              <div className="vd-field" style={{ marginBottom: "0.5rem" }}>
-                <label>Cuéntanos sobre tu proyecto</label>
-                <textarea
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  placeholder="¿Qué quieres lograr? ¿Tienes alguna fecha límite?"
-                />
+              <div>
+                <label className="vd-label">Cuéntanos sobre tu proyecto</label>
+                <textarea className="vd-textarea" name="message" value={form.message} onChange={handleChange} placeholder="Describe brevemente lo que necesitas..." />
               </div>
-
-              <button type="submit" className="vd-submit" disabled={loading}>
-                {loading ? "Enviando..." : "Enviar solicitud →"}
+              <button type="submit" className="vd-btn vd-btn-primary" disabled={loading} style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }}>
+                {loading ? "Enviando..." : "Enviar consulta"} <span className="vd-btn-arrow">→</span>
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </section>
 
         {/* FOOTER */}
         <footer className="vd-footer">
-          <a
-            href="https://www.credly.com/badges/3d85e2fa-1dfe-45ab-8f42-18fabe3ef521"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="vd-cert-badge"
-            title="Google Cloud Certified - 8 specializations"
-          >
-            <span className="vd-cert-icon">🏆</span>
-            <span className="vd-cert-text">
-              <span className="vd-cert-title">Google Cloud Certified</span>
-              <span className="vd-cert-sub">8 specializations · Verified on Credly</span>
-            </span>
-          </a>
-          <p style={{ marginTop: "1.5rem" }}>
-            <strong>Vertice Digital</strong> · Guanacaste, Costa Rica · {new Date().getFullYear()}
-          </p>
-          <p style={{ marginTop: "0.4rem" }}>Diseño · Desarrollo · Automatización con IA</p>
+          <div className="vd-container">
+            <div className="vd-footer-links">
+              <a href="https://www.credly.com/users/allan-leal" target="_blank" rel="noopener noreferrer">Google Cloud Certified</a>
+              <a href="https://github.com/AllanLeal11" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <a href={ARIA_URL} target="_blank" rel="noopener noreferrer">Demo Aria</a>
+              <a href="mailto:allanleal65@gmail.com">contacto@verticedigital.space</a>
+              <a href="https://wa.me/50687518055" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            </div>
+            <div>
+              © {new Date().getFullYear()} Vértice Digital · Hecho con 💚 en Liberia, Guanacaste
+            </div>
+          </div>
         </footer>
-
-        {/* ARIA — Asistente IA flotante */}
-        {ariaOpen && (
-          <iframe
-            src={ARIA_URL}
-            title="Aria - Asistente Vertice Digital"
-            allow="microphone; autoplay"
-            className="vd-aria-frame"
-          />
-        )}
-        <button
-          className={`vd-aria-fab${ariaOpen ? " open" : ""}`}
-          onClick={() => setAriaOpen((v) => !v)}
-          aria-label={ariaOpen ? "Cerrar asistente" : "Abrir asistente Aria"}
-          data-testid="aria-toggle"
-        >
-          {ariaOpen ? "✕" : "💬"}
-        </button>
-
       </div>
+
+      {/* ARIA FAB */}
+      <button className="vd-aria-fab" onClick={() => setAriaOpen((v) => !v)} aria-label="Hablar con Aria">
+        {ariaOpen ? "✕" : "💬"}
+      </button>
+      {ariaOpen && (
+        <div className="vd-aria-frame-popup">
+          <iframe src={ARIA_URL} title="Aria" style={{ width: "100%", height: "100%", border: 0 }} />
+        </div>
+      )}
     </>
   );
 };
