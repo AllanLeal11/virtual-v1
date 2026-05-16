@@ -9,9 +9,18 @@
       <stop offset="0%" stop-color="#3b82f6"/>
       <stop offset="100%" stop-color="#10b981"/>
     </linearGradient>
+    <filter id="vd-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="64" height="64" rx="14" fill="#050811"/>
+
+  <!-- Lines connecting vertices (the V network) -->
   <g stroke="url(#vd-line)" stroke-width="1.4" stroke-linecap="round" fill="none">
+    <!-- Left side lines -->
     <line x1="14" y1="14" x2="22" y2="22"/>
     <line x1="14" y1="14" x2="20" y2="32"/>
     <line x1="14" y1="14" x2="32" y2="55"/>
@@ -20,6 +29,8 @@
     <line x1="20" y1="32" x2="32" y2="35"/>
     <line x1="20" y1="32" x2="32" y2="55"/>
     <line x1="32" y1="35" x2="32" y2="55"/>
+
+    <!-- Right side lines -->
     <line x1="50" y1="12" x2="44" y2="22"/>
     <line x1="50" y1="12" x2="46" y2="32"/>
     <line x1="50" y1="12" x2="32" y2="55"/>
@@ -27,9 +38,13 @@
     <line x1="44" y1="22" x2="32" y2="35"/>
     <line x1="46" y1="32" x2="32" y2="35"/>
     <line x1="46" y1="32" x2="32" y2="55"/>
+
+    <!-- Bridge lines -->
     <line x1="22" y1="22" x2="44" y2="22"/>
   </g>
-  <g fill="url(#vd-dot)">
+
+  <!-- Vertices (the dots) -->
+  <g fill="url(#vd-dot)" filter="url(#vd-glow)">
     <circle cx="14" cy="14" r="2.4"/>
     <circle cx="50" cy="12" r="2.4"/>
     <circle cx="22" cy="22" r="2"/>

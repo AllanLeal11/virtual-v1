@@ -120,15 +120,22 @@ const styles = `
   }
   .vd-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text); }
   .vd-logo-mark {
-    width: 38px; height: 38px;
-    border-radius: 11px;
-    background: var(--gradient-1);
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
     display: grid; place-items: center;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #050811;
-    box-shadow: 0 8px 24px rgba(0,245,212,0.35);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(16,185,129,0.2);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, border-color 0.3s;
   }
-  .vd-logo:hover .vd-logo-mark { transform: rotate(-8deg) scale(1.05); }
+  .vd-logo-mark img { width: 100%; height: 100%; display: block; }
+  .vd-logo:hover .vd-logo-mark {
+    transform: rotate(-6deg) scale(1.08);
+    box-shadow: 0 12px 32px rgba(16,185,129,0.4);
+    border-color: rgba(16,185,129,0.4);
+  }
   .vd-logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
   .vd-nav-cta {
     padding: 0.6rem 1.25rem;
@@ -716,7 +723,9 @@ const LandingPage = () => {
         {/* NAV */}
         <nav className="vd-nav">
           <a href="#top" className="vd-logo">
-            <span className="vd-logo-mark">V</span>
+            <span className="vd-logo-mark">
+              <img src="/vd-logo.svg" alt="Vértice Digital" />
+            </span>
             <span className="vd-logo-text">Vértice Digital</span>
           </a>
           <button className="vd-nav-cta" onClick={scrollToForm}>Cotizar →</button>
