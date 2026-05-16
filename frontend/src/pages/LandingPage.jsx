@@ -73,11 +73,15 @@ const styles = `
   }
 
   /* Typography */
-  .vd-h1, .vd-h2, .vd-h3, .vd-h-display { font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
-  .vd-h-display { font-size: clamp(2.8rem, 7vw, 5.5rem); }
-  .vd-h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); }
-  .vd-h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); }
-  .vd-h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+  .vd-h1, .vd-h2, .vd-h3, .vd-h-display {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.08;
+    word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;
+  }
+  .vd-h-display { font-size: clamp(2.2rem, 7vw, 5.5rem); line-height: 1.05; }
+  .vd-h1 { font-size: clamp(1.8rem, 5vw, 3.8rem); }
+  .vd-h2 { font-size: clamp(1.5rem, 3.5vw, 2.6rem); }
+  .vd-h3 { font-size: clamp(1.1rem, 2vw, 1.5rem); }
   .vd-eyebrow { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
   .vd-body { font-family: 'Inter', sans-serif; }
   .vd-mono { font-family: 'Space Grotesk', sans-serif; font-variant-numeric: tabular-nums; }
@@ -144,19 +148,20 @@ const styles = `
   .vd-hero {
     position: relative;
     min-height: 100vh;
-    padding: 8rem 1.5rem 6rem;
+    padding: 7rem 1.25rem 4rem;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
   .vd-hero-orb {
     position: absolute; z-index: 0;
-    width: 700px; height: 700px;
+    width: min(700px, 90vw); height: min(700px, 90vw);
     border-radius: 50%;
     background: var(--gradient-1);
     filter: blur(140px); opacity: 0.35;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     animation: orbFloat 10s ease-in-out infinite;
+    will-change: transform;
   }
   @keyframes orbFloat {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
@@ -170,9 +175,11 @@ const styles = `
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
     backdrop-filter: blur(10px);
-    font-family: 'Space Grotesk', sans-serif; font-size: 0.78rem; font-weight: 500;
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(0.7rem, 1.6vw, 0.8rem); font-weight: 500;
     color: var(--text-muted);
     margin-bottom: 2rem;
+    max-width: 95%;
+    text-align: center;
   }
   .vd-hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s ease-in-out infinite; }
   @keyframes pulse {
@@ -224,8 +231,8 @@ const styles = `
   .vd-stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; }
 
   /* SECTION */
-  .vd-section { padding: 7rem 1.5rem; position: relative; }
-  .vd-section-head { max-width: 800px; margin: 0 auto 4rem; text-align: center; }
+  .vd-section { padding: clamp(4rem, 8vw, 7rem) 1.25rem; position: relative; }
+  .vd-section-head { max-width: 800px; margin: 0 auto clamp(2.5rem, 6vw, 4rem); text-align: center; padding: 0 0.5rem; }
   .vd-section-head .vd-eyebrow { display: inline-block; margin-bottom: 1rem; }
   .vd-section-head .vd-h1 { margin: 0; }
   .vd-section-head p { color: var(--text-muted); font-size: 1.1rem; margin-top: 1rem; line-height: 1.6; }
@@ -277,7 +284,7 @@ const styles = `
   /* ARIA section */
   .vd-aria-section {
     margin: 4rem auto; max-width: 1280px;
-    padding: 4rem 2.5rem;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2.5rem);
     border-radius: 32px;
     background:
       radial-gradient(ellipse at top right, rgba(124,58,237,0.18), transparent 60%),
@@ -367,21 +374,22 @@ const styles = `
 
   /* Marquee */
   .vd-marquee {
-    overflow: hidden; padding: 3rem 0;
+    overflow: hidden; padding: clamp(2rem, 5vw, 3rem) 0;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     background: rgba(0,0,0,0.2);
-    margin: 4rem 0 0;
+    margin: clamp(2.5rem, 6vw, 4rem) 0 0;
   }
   .vd-marquee-track {
-    display: flex; gap: 4rem; white-space: nowrap;
+    display: flex; gap: clamp(2rem, 4vw, 4rem); white-space: nowrap;
     animation: marquee 30s linear infinite;
   }
   .vd-marquee-item {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 2rem; font-weight: 700;
+    font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 700;
     color: var(--text-muted);
     display: flex; align-items: center; gap: 1rem;
+    flex-shrink: 0;
   }
   .vd-marquee-item::before { content: '◆'; color: var(--accent); font-size: 0.6em; }
   @keyframes marquee {
@@ -430,9 +438,102 @@ const styles = `
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* Reveal animations */
-  .vd-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-  .vd-reveal.in-view { opacity: 1; transform: translateY(0); }
+  /* Reveal animations — scroll driven */
+  .vd-reveal {
+    opacity: 0; transform: translateY(60px) scale(0.98);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+  .vd-reveal.in-view { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* Staggered children reveal */
+  .vd-reveal-stagger > * {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vd-reveal-stagger.in-view > * { opacity: 1; transform: translateY(0); }
+  .vd-reveal-stagger.in-view > *:nth-child(1) { transition-delay: 0.05s; }
+  .vd-reveal-stagger.in-view > *:nth-child(2) { transition-delay: 0.15s; }
+  .vd-reveal-stagger.in-view > *:nth-child(3) { transition-delay: 0.25s; }
+  .vd-reveal-stagger.in-view > *:nth-child(4) { transition-delay: 0.35s; }
+  .vd-reveal-stagger.in-view > *:nth-child(5) { transition-delay: 0.45s; }
+  .vd-reveal-stagger.in-view > *:nth-child(6) { transition-delay: 0.55s; }
+  .vd-reveal-stagger.in-view > *:nth-child(7) { transition-delay: 0.65s; }
+
+  /* Parallax layers driven by JS --scroll-y CSS var */
+  .vd-parallax-slow { transform: translateY(calc(var(--scroll-y, 0) * 0.3px)); will-change: transform; }
+  .vd-parallax-mid  { transform: translateY(calc(var(--scroll-y, 0) * 0.6px)); will-change: transform; }
+  .vd-parallax-fast { transform: translateY(calc(var(--scroll-y, 0) * 1.2px)); will-change: transform; }
+
+  /* Hero opacity tied to scroll */
+  .vd-hero-inner { transition: none; }
+
+  /* ============================================ */
+  /* RESPONSIVE BREAKPOINTS                       */
+  /* ============================================ */
+
+  /* Tablet */
+  @media (max-width: 1024px) {
+    .vd-aria-section { grid-template-columns: 1fr; gap: 2rem; }
+    .vd-aria-frame-wrap { aspect-ratio: 9/12; max-width: 380px; margin: 0 auto; }
+  }
+
+  /* Mobile landscape */
+  @media (max-width: 768px) {
+    .vd-cursor { display: none; }
+    .vd-nav { padding: 0.8rem 1rem; }
+    .vd-logo-mark { width: 34px; height: 34px; font-size: 0.95rem; }
+    .vd-logo-text { font-size: 0.95rem; }
+    .vd-nav-cta { padding: 0.5rem 1rem; font-size: 0.78rem; }
+
+    .vd-hero { padding: 6rem 1rem 3rem; min-height: auto; }
+    .vd-hero-orb { width: 80vw; height: 80vw; filter: blur(100px); }
+    .vd-hero-badge { font-size: 0.7rem; padding: 0.35rem 0.85rem; }
+    .vd-hero-sub { font-size: 0.98rem; padding: 0 0.5rem; }
+    .vd-hero-actions { flex-direction: column; align-items: stretch; gap: 0.75rem; max-width: 320px; margin: 2rem auto 0; }
+    .vd-hero-actions .vd-btn { width: 100%; justify-content: center; }
+    .vd-hero-stats { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 3.5rem; }
+
+    .vd-section { padding: 4rem 1rem; }
+    .vd-section-head { margin-bottom: 2.5rem; }
+    .vd-section-head p { font-size: 0.95rem; padding: 0 0.5rem; }
+
+    .vd-grid, .vd-vip-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .vd-card { padding: 1.5rem; }
+    .vd-card-icon { font-size: 1.8rem; }
+
+    .vd-vip-card { padding: 2rem 1.5rem; }
+    .vd-vip-price { font-size: 2.3rem; }
+
+    .vd-form { padding: 1.5rem; }
+    .vd-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
+
+    .vd-footer { padding: 3rem 1rem 2rem; }
+    .vd-footer-links { gap: 1rem; font-size: 0.8rem; }
+
+    .vd-aria-fab { width: 56px; height: 56px; bottom: 18px; right: 18px; }
+    .vd-aria-frame-popup { width: calc(100vw - 24px); right: 12px; left: 12px; bottom: 84px; height: min(560px, calc(100vh - 110px)); }
+  }
+
+  /* Mobile portrait */
+  @media (max-width: 480px) {
+    .vd-hero { padding: 5.5rem 0.9rem 2.5rem; }
+    .vd-hero-stats { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+    .vd-stat-num { font-size: 2rem; }
+    .vd-stat-label { font-size: 0.7rem; }
+
+    .vd-card { padding: 1.25rem; }
+    .vd-card h3 { font-size: 1.1rem; }
+    .vd-card-desc { font-size: 0.88rem; }
+
+    .vd-vip-card { padding: 1.75rem 1.25rem; }
+    .vd-vip-price { font-size: 2rem; }
+
+    .vd-form { padding: 1.25rem; }
+    .vd-input, .vd-textarea, .vd-select { padding: 0.85rem 1rem; font-size: 0.92rem; }
+
+    .vd-footer-links { gap: 0.75rem; font-size: 0.75rem; flex-direction: column; }
+  }
 
   /* Selected pill */
   .vd-selected-pills {
@@ -474,14 +575,64 @@ const LandingPage = () => {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // Scroll reveal with IntersectionObserver (GSAP-style without dependency)
+  // Scroll reveal with IntersectionObserver
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in-view")),
-      { threshold: 0.12 }
+      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" }
     );
-    document.querySelectorAll(".vd-reveal").forEach((el) => observer.observe(el));
+    document.querySelectorAll(".vd-reveal, .vd-reveal-stagger").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  // Scroll-driven parallax: actualiza --scroll-y en cada frame
+  // Aplica transforms basados en scroll position a elementos con .vd-parallax-*
+  useEffect(() => {
+    let ticking = false;
+    const heroOrb = document.querySelector(".vd-hero-orb");
+    const heroInner = document.querySelector(".vd-hero-inner");
+    const vantaGlobe = document.getElementById("vd-vanta-globe");
+
+    const update = () => {
+      const y = window.scrollY;
+      const viewportH = window.innerHeight;
+
+      // Update global var for any .vd-parallax-* class
+      document.documentElement.style.setProperty("--scroll-y", String(y));
+
+      // Hero parallax: orb floats up slower than scroll (parallax depth)
+      if (heroOrb) {
+        const translate = y * 0.3;
+        heroOrb.style.transform = `translate(-50%, calc(-50% + ${translate}px)) scale(${1 - Math.min(y / viewportH, 1) * 0.1})`;
+      }
+
+      // Hero inner: fade out + move up as you scroll
+      if (heroInner) {
+        const progress = Math.min(y / viewportH, 1);
+        heroInner.style.opacity = String(Math.max(0, 1 - progress * 1.4));
+        heroInner.style.transform = `translateY(${-y * 0.15}px)`;
+      }
+
+      // Vanta globe: slight parallax + fade
+      if (vantaGlobe) {
+        const progress = Math.min(y / (viewportH * 1.5), 1);
+        vantaGlobe.style.opacity = String(0.45 * (1 - progress * 0.7));
+        vantaGlobe.style.transform = `translateY(${y * 0.4}px)`;
+      }
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   // Card mouse tracking for spotlight effect
@@ -628,7 +779,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="vd-grid vd-reveal">
+          <div className="vd-grid vd-reveal-stagger">
             {SERVICES.map((s) => (
               <div
                 key={s.key}
@@ -683,7 +834,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="vd-vip-grid vd-reveal">
+          <div className="vd-vip-grid vd-reveal-stagger">
             {VIP_PLANS.map((p) => (
               <div key={p.key} className={`vd-vip-card ${p.popular ? "popular" : ""}`}>
                 {p.popular && <div className="vd-vip-badge">Más popular</div>}
