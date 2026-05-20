@@ -1,10 +1,13 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 import logging
 from pathlib import Path
@@ -33,12 +36,21 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'vertice_secret_2025')
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    logger_temp = logging.getLogger(__name__)
+    logger_temp.warning("JWT_SECRET not set in environment. Using insecure default. Set JWT_SECRET in your .env file!")
+    JWT_SECRET = 'vertice_secret_2025_CHANGE_THIS'
 JWT_ALGORITHM = "HS256"
 security = HTTPBearer()
 
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
 # Create the main app
 app = FastAPI(title="Vértice Digital API")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -58,7 +70,7 @@ class LoginResponse(BaseModel):
     username: str
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(..., min_length=1, max_length=2000)
 
 class ChatResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -397,20 +409,21 @@ async def root():
 
 # Auth routes
 @api_router.post("/auth/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
+@limiter.limit("10/minute")
+async def login(request: Request, request_body: LoginRequest):
     admin_username = os.environ.get('ADMIN_USERNAME', 'allan')
     admin_password = os.environ.get('ADMIN_PASSWORD', 'Vertice2025$')
-    
-    if request.username != admin_username or request.password != admin_password:
+
+    if request_body.username != admin_username or request_body.password != admin_password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = jwt.encode(
-        {"sub": request.username, "exp": datetime.now(timezone.utc).timestamp() + 86400},
+        {"sub": request_body.username, "exp": datetime.now(timezone.utc).timestamp() + 86400},
         JWT_SECRET,
         algorithm=JWT_ALGORITHM
     )
-    
-    return LoginResponse(token=token, username=request.username)
+
+    return LoginResponse(token=token, username=request_body.username)
 
 @api_router.get("/auth/verify")
 async def verify_auth(payload: dict = Depends(verify_token)):
@@ -418,12 +431,13 @@ async def verify_auth(payload: dict = Depends(verify_token)):
 
 # Chat routes
 @api_router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
+@limiter.limit("30/minute")
+async def chat(request: Request, body: ChatRequest, payload: dict = Depends(verify_token)):
     try:
-        agent = detect_agent(request.message)
-        
+        agent = detect_agent(body.message)
+
         system_message = f"{BASE_CONTEXT}\n\n{agent['system_prompt']}"
-        
+
         api_key = os.environ.get('GROQ_API_KEY') or os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('AI_API_KEY')
         if not api_key:
             raise HTTPException(status_code=500, detail="API key not configured")
@@ -437,7 +451,7 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
                 model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": system_message},
-                    {"role": "user", "content": request.message}
+                    {"role": "user", "content": body.message}
                 ],
                 max_tokens=8192,
                 temperature=0.7
@@ -450,7 +464,7 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
                 system_message=system_message
             ).with_model("openai", "gpt-4o")
             
-            user_message = UserMessage(text=request.message)
+            user_message = UserMessage(text=body.message)
             response_text = await chat_instance.send_message(user_message)
         else:
             from openai import AsyncOpenAI
@@ -470,7 +484,7 @@ async def chat(request: ChatRequest, payload: dict = Depends(verify_token)):
         chat_response = ChatResponse(
             agent_name=agent["name"],
             agent_emoji=agent["emoji"],
-            message=request.message,
+            message=body.message,
             response=response_text,
             has_html=has_html,
             has_proposal=has_proposal
@@ -603,12 +617,19 @@ from vip import vip_router, init_db as vip_init_db
 vip_init_db(db)
 app.include_router(vip_router)
 
+cors_origins_raw = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
+cors_origins = [o.strip() for o in cors_origins_raw.split(',') if o.strip()]
+if '*' in cors_origins:
+    logging.getLogger(__name__).warning(
+        "CORS is set to '*' — all origins allowed. Set CORS_ORIGINS to your domain in production!"
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=cors_origins,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # ============== SERVE REACT FRONTEND ==============
